@@ -101,11 +101,13 @@ export default function TelegramLinkDialog({
         }
     }, [open, contact, generateLink]);
 
-    // Poll for status every 3 seconds when dialog is open
+    // Poll for status every 2 seconds when dialog is open
     useEffect(() => {
         if (!open || !linkData || isLinked) return;
 
-        const interval = setInterval(checkStatus, 3000);
+        // Check immediately, then every 2 seconds
+        checkStatus();
+        const interval = setInterval(checkStatus, 2000);
         return () => clearInterval(interval);
     }, [open, linkData, isLinked, checkStatus]);
 

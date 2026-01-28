@@ -47,24 +47,33 @@ class TelegramLinkController extends Controller
 
     public function checkPending(Contact $contact): JsonResponse
     {
+        // Get the most recent token for this contact
         $token = TelegramLinkToken::where('contact_id', $contact->id)
-            ->where('status', 'pending')
-            ->where('expires_at', '>', now())
+            ->latest()
             ->first();
 
-        if (!$token) {
+        // Check if contact was linked (either via token or directly)
+        $contact->refresh();
+
+        if ($contact->telegram_chat_id) {
             return response()->json([
                 'pending' => false,
+                'linked' => true,
+                'telegram_chat_id' => $contact->telegram_chat_id,
             ]);
         }
 
-        // Refresh to check if it was linked
-        $token->refresh();
+        if (!$token || $token->expires_at->isPast()) {
+            return response()->json([
+                'pending' => false,
+                'linked' => false,
+            ]);
+        }
 
         return response()->json([
             'pending' => $token->status === 'pending',
             'linked' => $token->status === 'linked',
-            'telegram_chat_id' => $contact->fresh()->telegram_chat_id,
+            'telegram_chat_id' => $token->telegram_chat_id,
         ]);
     }
 }
