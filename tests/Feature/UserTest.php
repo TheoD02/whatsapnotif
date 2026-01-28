@@ -1,134 +1,112 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-class UserTest extends TestCase
-{
-    use RefreshDatabase;
+test('guest can view login page', function () {
+    $this->get('/login')->assertStatus(200);
+});
 
-    public function test_guest_can_view_login_page(): void
-    {
-        $response = $this->get('/login');
+test('guest can view register page', function () {
+    $this->get('/register')->assertStatus(200);
+});
 
-        $response->assertStatus(200);
-    }
+test('user can login with correct credentials', function () {
+    $user = User::factory()->create();
 
-    public function test_guest_can_view_register_page(): void
-    {
-        $response = $this->get('/register');
+    $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertRedirect();
 
-        $response->assertStatus(200);
-    }
+    $this->assertAuthenticatedAs($user);
+});
 
-    public function test_user_can_login_with_correct_credentials(): void
-    {
-        $user = User::factory()->create();
+test('user cannot login with incorrect password', function () {
+    $user = User::factory()->create();
 
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+    $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
 
-        $response->assertRedirect();
-        $this->assertAuthenticatedAs($user);
-    }
+    $this->assertGuest();
+});
 
-    public function test_user_cannot_login_with_incorrect_password(): void
-    {
-        $user = User::factory()->create();
+test('authenticated user can logout', function () {
+    $user = User::factory()->create();
 
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
+    $this->actingAs($user)
+        ->post('/logout')
+        ->assertRedirect();
 
-        $this->assertGuest();
-    }
+    $this->assertGuest();
+});
 
-    public function test_authenticated_user_can_logout(): void
-    {
-        $user = User::factory()->create();
+test('pending user is redirected to pending approval page', function () {
+    $user = User::factory()->pending()->create();
 
-        $response = $this->actingAs($user)->post('/logout');
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertRedirect('/pending-approval');
+});
 
-        $response->assertRedirect();
-        $this->assertGuest();
-    }
+test('active user can access dashboard', function () {
+    $user = User::factory()->create();
 
-    public function test_pending_user_is_redirected_to_pending_approval_page(): void
-    {
-        $user = User::factory()->pending()->create();
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertStatus(200);
+});
 
-        $response = $this->actingAs($user)->get('/dashboard');
+test('admin can access admin dashboard', function () {
+    $admin = User::factory()->admin()->create();
 
-        $response->assertRedirect('/pending-approval');
-    }
+    $this->actingAs($admin)
+        ->get('/admin')
+        ->assertStatus(200);
+});
 
-    public function test_active_user_can_access_dashboard(): void
-    {
-        $user = User::factory()->create();
+test('operator cannot access admin dashboard', function () {
+    $operator = User::factory()->operator()->create();
 
-        $response = $this->actingAs($user)->get('/dashboard');
+    $this->actingAs($operator)
+        ->get('/admin')
+        ->assertStatus(403);
+});
 
-        $response->assertStatus(200);
-    }
+test('admin can approve pending user', function () {
+    $admin = User::factory()->admin()->create();
+    $pendingUser = User::factory()->pending()->create();
 
-    public function test_admin_can_access_admin_dashboard(): void
-    {
-        $admin = User::factory()->admin()->create();
+    $this->actingAs($admin)
+        ->post("/admin/users/{$pendingUser->id}/approve")
+        ->assertRedirect();
 
-        $response = $this->actingAs($admin)->get('/admin');
+    expect($pendingUser->fresh()->status)->toBe(UserStatus::Active);
+});
 
-        $response->assertStatus(200);
-    }
+test('admin can reject pending user', function () {
+    $admin = User::factory()->admin()->create();
+    $pendingUser = User::factory()->pending()->create();
 
-    public function test_operator_cannot_access_admin_dashboard(): void
-    {
-        $operator = User::factory()->operator()->create();
+    $this->actingAs($admin)
+        ->post("/admin/users/{$pendingUser->id}/reject")
+        ->assertRedirect();
 
-        $response = $this->actingAs($operator)->get('/admin');
+    expect($pendingUser->fresh()->status)->toBe(UserStatus::Rejected);
+});
 
-        $response->assertStatus(403);
-    }
+test('admin can change user role', function () {
+    $admin = User::factory()->admin()->create();
+    $operator = User::factory()->operator()->create();
 
-    public function test_admin_can_approve_pending_user(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $pendingUser = User::factory()->pending()->create();
-
-        $response = $this->actingAs($admin)->post("/admin/users/{$pendingUser->id}/approve");
-
-        $response->assertRedirect();
-        $this->assertEquals(UserStatus::Active, $pendingUser->fresh()->status);
-    }
-
-    public function test_admin_can_reject_pending_user(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $pendingUser = User::factory()->pending()->create();
-
-        $response = $this->actingAs($admin)->post("/admin/users/{$pendingUser->id}/reject");
-
-        $response->assertRedirect();
-        $this->assertEquals(UserStatus::Rejected, $pendingUser->fresh()->status);
-    }
-
-    public function test_admin_can_change_user_role(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $operator = User::factory()->operator()->create();
-
-        $response = $this->actingAs($admin)->put("/admin/users/{$operator->id}/role", [
+    $this->actingAs($admin)
+        ->put("/admin/users/{$operator->id}/role", [
             'role' => UserRole::Admin->value,
-        ]);
+        ])
+        ->assertRedirect();
 
-        $response->assertRedirect();
-        $this->assertEquals(UserRole::Admin, $operator->fresh()->role);
-    }
-}
+    expect($operator->fresh()->role)->toBe(UserRole::Admin);
+});

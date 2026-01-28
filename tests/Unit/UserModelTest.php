@@ -1,92 +1,74 @@
 <?php
 
-namespace Tests\Unit;
-
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\Group;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-class UserModelTest extends TestCase
-{
-    use RefreshDatabase;
+test('user can be admin', function () {
+    $user = User::factory()->admin()->create();
 
-    public function test_user_can_be_admin(): void
-    {
-        $user = User::factory()->admin()->create();
+    expect($user->isAdmin())->toBeTrue();
+    expect($user->isOperator())->toBeFalse();
+});
 
-        $this->assertTrue($user->isAdmin());
-        $this->assertFalse($user->isOperator());
-    }
+test('user can be operator', function () {
+    $user = User::factory()->operator()->create();
 
-    public function test_user_can_be_operator(): void
-    {
-        $user = User::factory()->operator()->create();
+    expect($user->isOperator())->toBeTrue();
+    expect($user->isAdmin())->toBeFalse();
+});
 
-        $this->assertTrue($user->isOperator());
-        $this->assertFalse($user->isAdmin());
-    }
+test('user status can be active', function () {
+    $user = User::factory()->create();
 
-    public function test_user_status_can_be_active(): void
-    {
-        $user = User::factory()->create();
+    expect($user->isActive())->toBeTrue();
+    expect($user->isPending())->toBeFalse();
+});
 
-        $this->assertTrue($user->isActive());
-        $this->assertFalse($user->isPending());
-    }
+test('user status can be pending', function () {
+    $user = User::factory()->pending()->create();
 
-    public function test_user_status_can_be_pending(): void
-    {
-        $user = User::factory()->pending()->create();
+    expect($user->isPending())->toBeTrue();
+    expect($user->isActive())->toBeFalse();
+});
 
-        $this->assertTrue($user->isPending());
-        $this->assertFalse($user->isActive());
-    }
+test('admin can access all groups', function () {
+    $admin = User::factory()->admin()->create();
+    $group = Group::factory()->create();
 
-    public function test_admin_can_access_all_groups(): void
-    {
-        $admin = User::factory()->admin()->create();
-        $group = Group::factory()->create();
+    expect($admin->canAccessGroup($group))->toBeTrue();
+});
 
-        $this->assertTrue($admin->canAccessGroup($group));
-    }
+test('operator can only access allowed groups', function () {
+    $operator = User::factory()->operator()->create();
+    $allowedGroup = Group::factory()->create();
+    $restrictedGroup = Group::factory()->create();
 
-    public function test_operator_can_only_access_allowed_groups(): void
-    {
-        $operator = User::factory()->operator()->create();
-        $allowedGroup = Group::factory()->create();
-        $restrictedGroup = Group::factory()->create();
+    $operator->allowedGroups()->attach($allowedGroup);
 
-        $operator->allowedGroups()->attach($allowedGroup);
+    expect($operator->canAccessGroup($allowedGroup))->toBeTrue();
+    expect($operator->canAccessGroup($restrictedGroup))->toBeFalse();
+});
 
-        $this->assertTrue($operator->canAccessGroup($allowedGroup));
-        $this->assertFalse($operator->canAccessGroup($restrictedGroup));
-    }
+test('user role is cast to enum', function () {
+    $user = User::factory()->admin()->create();
 
-    public function test_user_role_is_cast_to_enum(): void
-    {
-        $user = User::factory()->admin()->create();
+    expect($user->role)->toBeInstanceOf(UserRole::class);
+    expect($user->role)->toBe(UserRole::Admin);
+});
 
-        $this->assertInstanceOf(UserRole::class, $user->role);
-        $this->assertEquals(UserRole::Admin, $user->role);
-    }
+test('user status is cast to enum', function () {
+    $user = User::factory()->pending()->create();
 
-    public function test_user_status_is_cast_to_enum(): void
-    {
-        $user = User::factory()->pending()->create();
+    expect($user->status)->toBeInstanceOf(UserStatus::class);
+    expect($user->status)->toBe(UserStatus::Pending);
+});
 
-        $this->assertInstanceOf(UserStatus::class, $user->status);
-        $this->assertEquals(UserStatus::Pending, $user->status);
-    }
+test('user can have inviter', function () {
+    $inviter = User::factory()->admin()->create();
+    $invitee = User::factory()->create(['invited_by' => $inviter->id]);
 
-    public function test_user_can_have_inviter(): void
-    {
-        $inviter = User::factory()->admin()->create();
-        $invitee = User::factory()->create(['invited_by' => $inviter->id]);
-
-        $this->assertEquals($inviter->id, $invitee->inviter->id);
-        $this->assertTrue($inviter->invitedUsers->contains($invitee));
-    }
-}
+    expect($invitee->inviter->id)->toBe($inviter->id);
+    expect($inviter->invitedUsers->pluck('id'))->toContain($invitee->id);
+});
