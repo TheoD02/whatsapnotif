@@ -25,3 +25,7 @@ Thumbs.db
 /.claude
 /whatsapp-service/node_modules
 /whatsapp-service/auth_info
+/tests/Browser/screenshots
+/tests/Browser/console
+/tests/Browser/source
+.env.dusk.local
