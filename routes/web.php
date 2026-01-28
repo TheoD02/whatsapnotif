@@ -81,6 +81,9 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class, \Ap
         Route::get('/whatsapp/status', [Admin\WhatsAppController::class, 'status'])->name('whatsapp.status');
         Route::post('/whatsapp/logout', [Admin\WhatsAppController::class, 'logout'])->name('whatsapp.logout');
         Route::post('/whatsapp/reconnect', [Admin\WhatsAppController::class, 'reconnect'])->name('whatsapp.reconnect');
+
+        // Documentation
+        Route::get('/documentation/{page?}', [Admin\DocumentationController::class, 'index'])->name('documentation');
     });
 
 // Operator routes

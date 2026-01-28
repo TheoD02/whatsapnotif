@@ -14,6 +14,7 @@ import {
     LogOut,
     ChevronDown,
     Smartphone,
+    BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ const navigation = [
     { name: 'Templates', href: '/admin/templates', icon: FileText },
     { name: 'Tokens API', href: '/admin/api-tokens', icon: Key },
     { name: 'WhatsApp', href: '/admin/whatsapp', icon: Smartphone },
+    { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
 ];
 
 export default function AdminLayout({ children }: PropsWithChildren) {
@@ -89,7 +91,9 @@ export default function AdminLayout({ children }: PropsWithChildren) {
                 <ScrollArea className="h-[calc(100vh-4rem)]">
                     <nav className="p-4 space-y-1">
                         {navigation.map((item) => {
-                            const isActive = currentPath === item.href;
+                            const isActive = item.href === '/admin'
+                                ? currentPath === item.href
+                                : currentPath.startsWith(item.href);
                             return (
                                 <Link
                                     key={item.name}
