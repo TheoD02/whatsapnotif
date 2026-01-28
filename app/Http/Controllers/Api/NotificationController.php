@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\SendNotificationRequest;
+use App\Http\Resources\NotificationSentResource;
 use App\Jobs\SendNotificationJob;
 use App\Models\Contact;
-use App\Models\Group;
 use App\Services\NotificationService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
  * @tags Notifications
@@ -23,34 +22,13 @@ class NotificationController extends Controller
      * Envoyer une notification
      *
      * Envoie une notification à un ou plusieurs destinataires via WhatsApp ou Telegram.
+     * Les messages sont mis en file d'attente et envoyés de manière asynchrone.
      *
      * @operationId sendNotification
-     *
-     * @response 201 {
-     *   "success": true,
-     *   "notification_id": 42,
-     *   "recipients_count": 5
-     * }
-     * @response 422 {
-     *   "error": "Au moins un destinataire est requis"
-     * }
      */
-    public function send(Request $request): JsonResponse
+    public function send(SendNotificationRequest $request): NotificationSentResource
     {
-        $validated = $request->validate([
-            'content' => ['required', 'string', 'max:4096'],
-            'template_id' => ['nullable', 'exists:message_templates,id'],
-            'template_data' => ['nullable', 'array'],
-            'recipients' => ['required', 'array'],
-            'recipients.contact_ids' => ['nullable', 'array'],
-            'recipients.contact_ids.*' => ['exists:contacts,id'],
-            'recipients.group_ids' => ['nullable', 'array'],
-            'recipients.group_ids.*' => ['exists:groups,id'],
-            'recipients.phones' => ['nullable', 'array'],
-            'recipients.phones.*' => ['string', 'max:20'],
-            'channel' => ['nullable', 'in:whatsapp,sms,telegram,email'],
-        ]);
-
+        $validated = $request->validated();
         $apiToken = $request->api_token;
         $user = $apiToken->creator;
 
@@ -74,9 +52,7 @@ class NotificationController extends Controller
         $groupIds = $validated['recipients']['group_ids'] ?? [];
 
         if (empty($contactIds) && empty($groupIds)) {
-            return response()->json([
-                'error' => 'Au moins un destinataire est requis',
-            ], 422);
+            abort(422, 'Au moins un destinataire est requis');
         }
 
         $content = $validated['content'];
@@ -101,10 +77,6 @@ class NotificationController extends Controller
         $notification->update(['status' => 'queued']);
         SendNotificationJob::dispatch($notification);
 
-        return response()->json([
-            'success' => true,
-            'notification_id' => $notification->id,
-            'recipients_count' => $notification->recipients()->count(),
-        ], 201);
+        return new NotificationSentResource($notification);
     }
 }

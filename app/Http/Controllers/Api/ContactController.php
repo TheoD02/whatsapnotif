@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreContactRequest;
+use App\Http\Requests\Api\UpdateContactRequest;
+use App\Http\Resources\ContactResource;
+use App\Http\Resources\GroupResource;
+use App\Http\Resources\TemplateResource;
 use App\Models\Contact;
 use App\Models\Group;
-use Illuminate\Http\JsonResponse;
+use App\Models\MessageTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @tags Contacts
@@ -19,11 +25,12 @@ class ContactController extends Controller
      * Retourne la liste paginée des contacts avec leurs groupes.
      *
      * @operationId listContacts
-     * @queryParam group_id integer Filtrer par ID de groupe.
-     * @queryParam active boolean Filtrer par statut actif/inactif.
-     * @queryParam per_page integer Nombre de résultats par page (défaut: 50).
+     * @queryParam group_id integer Filtrer par ID de groupe. Example: 1
+     * @queryParam active boolean Filtrer par statut actif/inactif. Example: true
+     * @queryParam per_page integer Nombre de résultats par page (défaut: 50). Example: 20
+     * @queryParam page integer Numéro de page. Example: 1
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = Contact::with('groups');
 
@@ -39,7 +46,7 @@ class ContactController extends Controller
 
         $contacts = $query->latest()->paginate($request->per_page ?? 50);
 
-        return response()->json($contacts);
+        return ContactResource::collection($contacts);
     }
 
     /**
@@ -48,32 +55,20 @@ class ContactController extends Controller
      * Crée un nouveau contact avec ses groupes associés.
      *
      * @operationId createContact
-     * @response 201 {
-     *   "success": true,
-     *   "contact": {
-     *     "id": 1,
-     *     "name": "Jean Dupont",
-     *     "phone": "+33612345678",
-     *     "preferred_channel": "whatsapp",
-     *     "groups": []
-     *   }
-     * }
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreContactRequest $request): ContactResource
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:contacts'],
-            'metadata' => ['nullable', 'array'],
-            'group_ids' => ['nullable', 'array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
+        $validated = $request->validated();
 
-        $validated['phone'] = Contact::formatPhone($validated['phone']);
+        if (isset($validated['phone'])) {
+            $validated['phone'] = Contact::formatPhone($validated['phone']);
+        }
 
         $contact = Contact::create([
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
+            'phone' => $validated['phone'] ?? null,
+            'preferred_channel' => $validated['preferred_channel'] ?? 'whatsapp',
+            'telegram_chat_id' => $validated['telegram_chat_id'] ?? null,
             'metadata' => $validated['metadata'] ?? [],
         ]);
 
@@ -81,10 +76,7 @@ class ContactController extends Controller
             $contact->groups()->sync($validated['group_ids']);
         }
 
-        return response()->json([
-            'success' => true,
-            'contact' => $contact->load('groups'),
-        ], 201);
+        return new ContactResource($contact->load('groups'));
     }
 
     /**
@@ -94,11 +86,9 @@ class ContactController extends Controller
      *
      * @operationId getContact
      */
-    public function show(Contact $contact): JsonResponse
+    public function show(Contact $contact): ContactResource
     {
-        return response()->json([
-            'contact' => $contact->load('groups'),
-        ]);
+        return new ContactResource($contact->load('groups'));
     }
 
     /**
@@ -108,16 +98,9 @@ class ContactController extends Controller
      *
      * @operationId updateContact
      */
-    public function update(Request $request, Contact $contact): JsonResponse
+    public function update(UpdateContactRequest $request, Contact $contact): ContactResource
     {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'phone' => ['sometimes', 'string', 'max:20', 'unique:contacts,phone,' . $contact->id],
-            'metadata' => ['nullable', 'array'],
-            'is_active' => ['sometimes', 'boolean'],
-            'group_ids' => ['nullable', 'array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['phone'])) {
             $validated['phone'] = Contact::formatPhone($validated['phone']);
@@ -129,10 +112,7 @@ class ContactController extends Controller
             $contact->groups()->sync($validated['group_ids'] ?? []);
         }
 
-        return response()->json([
-            'success' => true,
-            'contact' => $contact->load('groups'),
-        ]);
+        return new ContactResource($contact->load('groups'));
     }
 
     /**
@@ -143,13 +123,11 @@ class ContactController extends Controller
      * @operationId listGroups
      * @tags Groupes
      */
-    public function groups(): JsonResponse
+    public function groups(): AnonymousResourceCollection
     {
         $groups = Group::withCount('contacts')->orderBy('name')->get();
 
-        return response()->json([
-            'groups' => $groups,
-        ]);
+        return GroupResource::collection($groups);
     }
 
     /**
@@ -160,14 +138,12 @@ class ContactController extends Controller
      * @operationId listTemplates
      * @tags Templates
      */
-    public function templates(): JsonResponse
+    public function templates(): AnonymousResourceCollection
     {
-        $templates = \App\Models\MessageTemplate::where('is_active', true)
+        $templates = MessageTemplate::where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'content']);
+            ->get();
 
-        return response()->json([
-            'templates' => $templates,
-        ]);
+        return TemplateResource::collection($templates);
     }
 }
