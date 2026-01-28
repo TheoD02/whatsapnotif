@@ -8,6 +8,8 @@ import {
     Edit,
     Trash2,
     Phone,
+    Send,
+    MessageSquare,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -43,8 +45,27 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import type { Contact, Group, PaginatedData } from '@/types';
+import { Textarea } from '@/components/ui/textarea';
+import type { Contact, Group, PaginatedData, PreferredChannel } from '@/types';
 import { formatPhone } from '@/lib/utils';
+
+const ChannelBadge = ({ channel }: { channel: PreferredChannel }) => (
+    <Badge
+        variant={channel === 'telegram' ? 'default' : 'secondary'}
+        className={
+            channel === 'telegram'
+                ? 'bg-blue-500 hover:bg-blue-600'
+                : 'bg-green-500 hover:bg-green-600 text-white'
+        }
+    >
+        {channel === 'telegram' ? (
+            <Send className="h-3 w-3 mr-1" />
+        ) : (
+            <MessageSquare className="h-3 w-3 mr-1" />
+        )}
+        {channel === 'telegram' ? 'Telegram' : 'WhatsApp'}
+    </Badge>
+);
 
 interface Props {
     contacts: PaginatedData<Contact>;
@@ -61,6 +82,13 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
     const [importOpen, setImportOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
     const [importGroup, setImportGroup] = useState<string>('');
+    const [testContact, setTestContact] = useState<Contact | null>(null);
+    const [testMessage, setTestMessage] = useState('');
+    const [testLoading, setTestLoading] = useState(false);
+    const [testResult, setTestResult] = useState<{
+        success?: boolean;
+        error?: string;
+    } | null>(null);
 
     const handleSearch = (value: string) => {
         setSearch(value);
@@ -103,6 +131,54 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
         });
     };
 
+    const openTestDialog = (contact: Contact) => {
+        setTestContact(contact);
+        setTestMessage(`Bonjour ${contact.name}, ceci est un message de test.`);
+        setTestResult(null);
+    };
+
+    const closeTestDialog = () => {
+        setTestContact(null);
+        setTestMessage('');
+        setTestResult(null);
+    };
+
+    const handleSendTest = async () => {
+        if (!testContact || !testMessage) return;
+
+        setTestLoading(true);
+        setTestResult(null);
+
+        const identifier =
+            testContact.preferred_channel === 'telegram'
+                ? testContact.telegram_chat_id
+                : testContact.phone;
+
+        try {
+            const response = await fetch('/admin/contacts/test-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    identifier,
+                    message: testMessage,
+                    channel: testContact.preferred_channel || 'whatsapp',
+                }),
+            });
+            const result = await response.json();
+            setTestResult(result);
+        } catch {
+            setTestResult({ success: false, error: 'Erreur de connexion' });
+        } finally {
+            setTestLoading(false);
+        }
+    };
+
     return (
         <AdminLayout>
             <Head title="Contacts" />
@@ -112,7 +188,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                     <div>
                         <h1 className="text-3xl font-bold">Contacts</h1>
                         <p className="text-muted-foreground">
-                            Gérez vos contacts WhatsApp
+                            Gérez vos contacts WhatsApp et Telegram
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -185,7 +261,8 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Nom</TableHead>
-                                <TableHead>Téléphone</TableHead>
+                                <TableHead>Canal</TableHead>
+                                <TableHead>Identifiant</TableHead>
                                 <TableHead>Groupes</TableHead>
                                 <TableHead>Statut</TableHead>
                                 <TableHead className="w-[70px]"></TableHead>
@@ -195,7 +272,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                             {contacts.data.length === 0 ? (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={6}
                                         className="text-center text-muted-foreground"
                                     >
                                         Aucun contact trouvé
@@ -208,9 +285,29 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                                             {contact.name}
                                         </TableCell>
                                         <TableCell>
-                                            <span className="flex items-center gap-2">
-                                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                                {formatPhone(contact.phone)}
+                                            <ChannelBadge
+                                                channel={
+                                                    contact.preferred_channel ||
+                                                    'whatsapp'
+                                                }
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                {contact.preferred_channel ===
+                                                'telegram' ? (
+                                                    <>
+                                                        <Send className="h-4 w-4" />
+                                                        {contact.telegram_chat_id}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Phone className="h-4 w-4" />
+                                                        {formatPhone(
+                                                            contact.phone
+                                                        )}
+                                                    </>
+                                                )}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -256,6 +353,16 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        onClick={() =>
+                                                            openTestDialog(
+                                                                contact
+                                                            )
+                                                        }
+                                                    >
+                                                        <Send className="mr-2 h-4 w-4" />
+                                                        Envoyer un test
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem asChild>
                                                         <Link
                                                             href={`/admin/contacts/${contact.id}/edit`}
@@ -360,6 +467,74 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                         </Button>
                         <Button onClick={handleImport} disabled={!importFile}>
                             Importer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Test Message Dialog */}
+            <Dialog
+                open={!!testContact}
+                onOpenChange={(open) => !open && closeTestDialog()}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Envoyer un message test</DialogTitle>
+                        <DialogDescription>
+                            Envoyez un message de test à {testContact?.name} via{' '}
+                            {testContact?.preferred_channel === 'telegram'
+                                ? 'Telegram'
+                                : 'WhatsApp'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            {testContact?.preferred_channel === 'telegram' ? (
+                                <>
+                                    <Send className="h-4 w-4" />
+                                    Chat ID: {testContact?.telegram_chat_id}
+                                </>
+                            ) : (
+                                <>
+                                    <Phone className="h-4 w-4" />
+                                    {formatPhone(testContact?.phone || '')}
+                                </>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="test-message">Message</Label>
+                            <Textarea
+                                id="test-message"
+                                value={testMessage}
+                                onChange={(e) => setTestMessage(e.target.value)}
+                                rows={4}
+                            />
+                        </div>
+
+                        {testResult && (
+                            <div
+                                className={`p-3 rounded-lg ${
+                                    testResult.success
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                }`}
+                            >
+                                {testResult.success
+                                    ? 'Message envoyé avec succès !'
+                                    : `Erreur : ${testResult.error}`}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={closeTestDialog}>
+                            Fermer
+                        </Button>
+                        <Button
+                            onClick={handleSendTest}
+                            disabled={testLoading || !testMessage}
+                        >
+                            {testLoading ? 'Envoi...' : 'Envoyer'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

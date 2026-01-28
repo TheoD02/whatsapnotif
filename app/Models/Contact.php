@@ -16,6 +16,8 @@ class Contact extends Model
         'phone',
         'metadata',
         'is_active',
+        'preferred_channel',
+        'telegram_chat_id',
     ];
 
     protected function casts(): array
@@ -49,5 +51,12 @@ class Contact extends Model
         }
 
         return $phone;
+    }
+
+    public function getChannelIdentifier(): ?string
+    {
+        return $this->preferred_channel === 'telegram'
+            ? $this->telegram_chat_id
+            : $this->phone;
     }
 }

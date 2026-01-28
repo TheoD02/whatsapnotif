@@ -23,12 +23,16 @@ export interface InvitationCode {
     updated_at: string;
 }
 
+export type PreferredChannel = 'whatsapp' | 'telegram';
+
 export interface Contact {
     id: number;
     name: string;
     phone: string;
     metadata: Record<string, string>;
     is_active: boolean;
+    preferred_channel: PreferredChannel;
+    telegram_chat_id: string | null;
     created_at: string;
     updated_at: string;
     groups?: Group[];

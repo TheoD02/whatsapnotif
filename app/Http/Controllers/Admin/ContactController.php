@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Models\Group;
+use App\Services\NotificationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -57,17 +59,23 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:contacts'],
+            'preferred_channel' => ['required', 'in:whatsapp,telegram'],
+            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts'],
+            'telegram_chat_id' => ['required_if:preferred_channel,telegram', 'nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],
             'group_ids' => ['nullable', 'array'],
             'group_ids.*' => ['exists:groups,id'],
         ]);
 
-        $validated['phone'] = Contact::formatPhone($validated['phone']);
+        if (!empty($validated['phone'])) {
+            $validated['phone'] = Contact::formatPhone($validated['phone']);
+        }
 
         $contact = Contact::create([
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
+            'phone' => $validated['phone'] ?? null,
+            'preferred_channel' => $validated['preferred_channel'],
+            'telegram_chat_id' => $validated['telegram_chat_id'] ?? null,
             'metadata' => $validated['metadata'] ?? [],
         ]);
 
@@ -94,18 +102,24 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:contacts,phone,' . $contact->id],
+            'preferred_channel' => ['required', 'in:whatsapp,telegram'],
+            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts,phone,' . $contact->id],
+            'telegram_chat_id' => ['required_if:preferred_channel,telegram', 'nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],
             'is_active' => ['boolean'],
             'group_ids' => ['nullable', 'array'],
             'group_ids.*' => ['exists:groups,id'],
         ]);
 
-        $validated['phone'] = Contact::formatPhone($validated['phone']);
+        if (!empty($validated['phone'])) {
+            $validated['phone'] = Contact::formatPhone($validated['phone']);
+        }
 
         $contact->update([
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
+            'phone' => $validated['phone'] ?? $contact->phone,
+            'preferred_channel' => $validated['preferred_channel'],
+            'telegram_chat_id' => $validated['telegram_chat_id'] ?? null,
             'metadata' => $validated['metadata'] ?? [],
             'is_active' => $validated['is_active'] ?? true,
         ]);
@@ -176,5 +190,22 @@ class ContactController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    public function testMessage(Request $request, NotificationService $notificationService): JsonResponse
+    {
+        $validated = $request->validate([
+            'identifier' => ['required', 'string'],
+            'message' => ['required', 'string'],
+            'channel' => ['required', 'in:whatsapp,telegram'],
+        ]);
+
+        $result = $notificationService->sendTest(
+            $validated['identifier'],
+            $validated['message'],
+            $validated['channel']
+        );
+
+        return response()->json($result);
     }
 }

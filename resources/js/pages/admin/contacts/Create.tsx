@@ -13,7 +13,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import type { Group } from '@/types';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import type { Group, PreferredChannel } from '@/types';
 
 interface Props {
     groups: Group[];
@@ -23,6 +30,8 @@ export default function ContactCreate({ groups }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         phone: '',
+        preferred_channel: 'whatsapp' as PreferredChannel,
+        telegram_chat_id: '',
         group_ids: [] as number[],
     });
 
@@ -88,24 +97,78 @@ export default function ContactCreate({ groups }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Téléphone</Label>
-                                <Input
-                                    id="phone"
-                                    value={data.phone}
-                                    onChange={(e) =>
-                                        setData('phone', e.target.value)
+                                <Label htmlFor="preferred_channel">
+                                    Canal de communication
+                                </Label>
+                                <Select
+                                    value={data.preferred_channel}
+                                    onValueChange={(value: PreferredChannel) =>
+                                        setData('preferred_channel', value)
                                     }
-                                    placeholder="+33612345678"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Format international recommandé
-                                </p>
-                                {errors.phone && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.phone}
-                                    </p>
-                                )}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="whatsapp">
+                                            WhatsApp
+                                        </SelectItem>
+                                        <SelectItem value="telegram">
+                                            Telegram
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
+
+                            {data.preferred_channel === 'whatsapp' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Téléphone</Label>
+                                    <Input
+                                        id="phone"
+                                        value={data.phone}
+                                        onChange={(e) =>
+                                            setData('phone', e.target.value)
+                                        }
+                                        placeholder="+33612345678"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Format international recommandé
+                                    </p>
+                                    {errors.phone && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.phone}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {data.preferred_channel === 'telegram' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="telegram_chat_id">
+                                        Chat ID Telegram
+                                    </Label>
+                                    <Input
+                                        id="telegram_chat_id"
+                                        value={data.telegram_chat_id}
+                                        onChange={(e) =>
+                                            setData(
+                                                'telegram_chat_id',
+                                                e.target.value
+                                            )
+                                        }
+                                        placeholder="123456789"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Obtenez le chat ID via @userinfobot sur
+                                        Telegram
+                                    </p>
+                                    {errors.telegram_chat_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.telegram_chat_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
                             {groups.length > 0 && (
                                 <div className="space-y-2">

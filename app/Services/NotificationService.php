@@ -10,25 +10,36 @@ use App\Models\Notification;
 use App\Models\NotificationRecipient;
 use App\Models\User;
 use App\Services\Messaging\MockChannel;
+use App\Services\Messaging\TelegramChannel;
+use App\Services\Messaging\WhatsAppBaileysChannel;
 use App\Services\Messaging\WhatsAppCloudChannel;
 use Illuminate\Support\Collection;
 
 class NotificationService
 {
-    private MessagingChannel $channel;
+    private MessagingChannel $defaultWhatsAppChannel;
 
     public function __construct()
     {
-        $this->channel = $this->resolveChannel();
+        $this->defaultWhatsAppChannel = $this->resolveWhatsAppChannel();
     }
 
-    private function resolveChannel(): MessagingChannel
+    private function resolveWhatsAppChannel(): MessagingChannel
     {
         $channelName = config('services.messaging.default', 'mock');
 
         return match ($channelName) {
             'whatsapp' => new WhatsAppCloudChannel(),
+            'whatsapp_baileys' => new WhatsAppBaileysChannel(),
             default => new MockChannel(),
+        };
+    }
+
+    private function getChannelForContact(Contact $contact): MessagingChannel
+    {
+        return match ($contact->preferred_channel) {
+            'telegram' => new TelegramChannel(),
+            default => $this->defaultWhatsAppChannel,
         };
     }
 
@@ -106,9 +117,17 @@ class NotificationService
             return;
         }
 
+        $channel = $this->getChannelForContact($contact);
+        $identifier = $contact->getChannelIdentifier();
+
+        if (empty($identifier)) {
+            $recipient->markAsFailed('Identifiant de contact manquant');
+            return;
+        }
+
         $message = $this->personalizeMessage($notification->content, $contact);
 
-        $result = $this->channel->send($contact->phone, $message);
+        $result = $channel->send($identifier, $message);
 
         if ($result->success) {
             $recipient->markAsSent();
@@ -117,9 +136,14 @@ class NotificationService
         }
     }
 
-    public function sendTest(string $phone, string $message): array
+    public function sendTest(string $identifier, string $message, string $channel = 'whatsapp'): array
     {
-        $result = $this->channel->send($phone, $message);
+        $channelInstance = match ($channel) {
+            'telegram' => new TelegramChannel(),
+            default => $this->defaultWhatsAppChannel,
+        };
+
+        $result = $channelInstance->send($identifier, $message);
 
         return [
             'success' => $result->success,

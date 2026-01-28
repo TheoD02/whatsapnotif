@@ -45,4 +45,12 @@ return [
         'api_version' => env('WHATSAPP_API_VERSION', 'v17.0'),
     ],
 
+    'whatsapp_baileys' => [
+        'url' => env('WHATSAPP_BAILEYS_URL', 'http://localhost:3001'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
 ];
