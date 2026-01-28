@@ -21,7 +21,7 @@ class NotificationController extends Controller
     /**
      * Envoyer une notification
      *
-     * Envoie une notification à un ou plusieurs destinataires via WhatsApp ou Telegram.
+     * Envoie une notification à un ou plusieurs destinataires via Telegram.
      * Les messages sont mis en file d'attente et envoyés de manière asynchrone.
      *
      * @operationId sendNotification
@@ -71,7 +71,7 @@ class NotificationController extends Controller
             contactIds: $contactIds,
             groupIds: $groupIds,
             templateId: $validated['template_id'] ?? null,
-            channel: $validated['channel'] ?? 'whatsapp'
+            channel: $validated['channel'] ?? 'telegram'
         );
 
         $notification->update(['status' => 'queued']);

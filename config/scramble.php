@@ -29,7 +29,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'API REST pour WhatsApp Hub - Envoi de notifications multi-canal (WhatsApp & Telegram)',
+        'description' => 'API REST pour Messaging Hub - Envoi de notifications Telegram',
     ],
 
     /*

@@ -66,7 +66,7 @@ export default function OperatorLayout({ children }: PropsWithChildren) {
             >
                 <div className="flex h-16 items-center gap-2 px-6 border-b border-sidebar-border">
                     <MessageSquare className="h-6 w-6 text-primary" />
-                    <span className="font-semibold text-lg">WhatsApp Hub</span>
+                    <span className="font-semibold text-lg">Messaging Hub</span>
                     <Button
                         variant="ghost"
                         size="icon"

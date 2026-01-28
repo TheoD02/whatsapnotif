@@ -23,7 +23,7 @@ export interface InvitationCode {
     updated_at: string;
 }
 
-export type PreferredChannel = 'whatsapp' | 'telegram';
+export type PreferredChannel = 'telegram';
 
 export interface Contact {
     id: number;
@@ -61,7 +61,7 @@ export interface MessageTemplate {
     creator?: User;
 }
 
-export type NotificationChannel = 'whatsapp' | 'sms' | 'telegram' | 'email';
+export type NotificationChannel = 'sms' | 'telegram' | 'email';
 export type NotificationStatus = 'draft' | 'queued' | 'sending' | 'sent' | 'partial' | 'failed';
 export type RecipientStatus = 'pending' | 'sent' | 'delivered' | 'failed';
 

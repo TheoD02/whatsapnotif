@@ -15,7 +15,7 @@ class ContactResource extends JsonResource
      *   id: int,
      *   name: string,
      *   phone: ?string,
-     *   preferred_channel: 'whatsapp'|'telegram',
+     *   preferred_channel: 'telegram',
      *   telegram_chat_id: ?string,
      *   is_active: bool,
      *   metadata: array<string, mixed>,

@@ -126,7 +126,7 @@ test('message personalization replaces variables', function () {
     expect($notification)->not->toBeNull();
 });
 
-test('notification channel defaults to whatsapp', function () {
+test('notification channel defaults to telegram', function () {
     $user = User::factory()->create();
     $contact = Contact::factory()->create();
 
@@ -136,7 +136,7 @@ test('notification channel defaults to whatsapp', function () {
         contactIds: [$contact->id],
     );
 
-    expect($notification->channel)->toBe(MessagingChannel::WhatsApp);
+    expect($notification->channel)->toBe(MessagingChannel::Telegram);
 });
 
 test('notification can use telegram channel', function () {

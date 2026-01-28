@@ -1,6 +1,6 @@
 # API Reference
 
-Documentation de l'API REST de WhatsApp Hub.
+Documentation de l'API REST de Messaging Hub.
 
 ## Authentification
 
@@ -95,8 +95,8 @@ GET /api/v1/contacts
       "id": 1,
       "name": "Jean Dupont",
       "phone": "+33612345678",
-      "preferred_channel": "whatsapp",
-      "telegram_chat_id": null,
+      "preferred_channel": "telegram",
+      "telegram_chat_id": "123456789",
       "is_active": true,
       "metadata": {
         "company": "ACME"
@@ -127,7 +127,8 @@ POST /api/v1/contacts
 {
   "name": "Jean Dupont",
   "phone": "+33612345678",
-  "preferred_channel": "whatsapp",
+  "preferred_channel": "telegram",
+  "telegram_chat_id": "123456789",
   "metadata": {
     "company": "ACME",
     "city": "Paris"
@@ -139,13 +140,11 @@ POST /api/v1/contacts
 | Champ | Type | Requis | Description |
 |-------|------|--------|-------------|
 | `name` | string | Oui | Nom du contact |
-| `phone` | string | Cond.* | Numéro WhatsApp |
-| `preferred_channel` | string | Oui | `whatsapp` ou `telegram` |
-| `telegram_chat_id` | string | Cond.* | Chat ID Telegram |
+| `phone` | string | Non | Numéro de téléphone |
+| `preferred_channel` | string | Non | `telegram` |
+| `telegram_chat_id` | string | Non | Chat ID Telegram |
 | `metadata` | object | Non | Données personnalisées |
 | `group_ids` | array | Non | IDs des groupes |
-
-\* `phone` requis si `preferred_channel` = whatsapp
 
 **Réponse :**
 

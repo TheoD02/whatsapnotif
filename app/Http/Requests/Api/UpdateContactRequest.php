@@ -21,7 +21,7 @@ class UpdateContactRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['sometimes', 'string', 'max:20', 'unique:contacts,phone,'.$contactId],
-            'preferred_channel' => ['sometimes', 'string', 'in:whatsapp,telegram'],
+            'preferred_channel' => ['sometimes', 'string', 'in:telegram'],
             'telegram_chat_id' => ['nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],
             'is_active' => ['sometimes', 'boolean'],
@@ -38,7 +38,7 @@ class UpdateContactRequest extends FormRequest
         return [
             'name' => 'Nom complet du contact',
             'phone' => 'Numéro de téléphone au format international (+33612345678)',
-            'preferred_channel' => 'Canal de communication préféré (whatsapp ou telegram)',
+            'preferred_channel' => 'Canal de communication préféré (telegram)',
             'telegram_chat_id' => 'ID du chat Telegram',
             'metadata' => 'Données personnalisées (fusionne avec les données existantes)',
             'is_active' => 'Statut du contact (true = actif, false = inactif)',

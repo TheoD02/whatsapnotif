@@ -18,8 +18,8 @@ class StoreContactRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'preferred_channel' => ['required', 'in:whatsapp,telegram'],
-            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts'],
+            'preferred_channel' => ['required', 'in:telegram'],
+            'phone' => ['nullable', 'string', 'max:20', 'unique:contacts'],
             'telegram_chat_id' => ['nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],
             'group_ids' => ['nullable', 'array'],
@@ -34,7 +34,6 @@ class StoreContactRequest extends FormRequest
     {
         return [
             'name.required' => 'Le nom est requis.',
-            'phone.required_if' => 'Le numéro de téléphone est requis pour WhatsApp.',
             'phone.unique' => 'Ce numéro de téléphone existe déjà.',
         ];
     }

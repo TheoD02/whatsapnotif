@@ -68,7 +68,7 @@ class ContactController extends Controller
         $contact = Contact::create([
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? null,
-            'preferred_channel' => $validated['preferred_channel'] ?? 'whatsapp',
+            'preferred_channel' => $validated['preferred_channel'] ?? 'telegram',
             'telegram_chat_id' => $validated['telegram_chat_id'] ?? null,
             'metadata' => $validated['metadata'] ?? [],
         ]);

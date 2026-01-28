@@ -1,6 +1,6 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { FormEvent, useState, useMemo } from 'react';
-import { Send, Users, FileText, Eye, FlaskConical, MessageSquare } from 'lucide-react';
+import { Send, Users, FileText, FlaskConical } from 'lucide-react';
 import OperatorLayout from '@/layouts/OperatorLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,25 +31,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import type { Contact, Group, MessageTemplate, PreferredChannel } from '@/types';
-
-const ChannelBadge = ({ channel }: { channel: PreferredChannel }) => (
-    <Badge
-        variant={channel === 'telegram' ? 'default' : 'secondary'}
-        className={
-            channel === 'telegram'
-                ? 'bg-blue-500 hover:bg-blue-600'
-                : 'bg-green-500 hover:bg-green-600 text-white'
-        }
-    >
-        {channel === 'telegram' ? (
-            <Send className="h-3 w-3 mr-1" />
-        ) : (
-            <MessageSquare className="h-3 w-3 mr-1" />
-        )}
-        {channel === 'telegram' ? 'Telegram' : 'WhatsApp'}
-    </Badge>
-);
+import type { Contact, Group, MessageTemplate } from '@/types';
 
 interface Props {
     groups: Array<Group & { contacts_count: number }>;
@@ -71,22 +53,12 @@ export default function NotificationCreate({
     });
 
     const [testDialogOpen, setTestDialogOpen] = useState(false);
-    const [testPhone, setTestPhone] = useState('');
+    const [testChatId, setTestChatId] = useState('');
     const [testResult, setTestResult] = useState<{
         success?: boolean;
         error?: string;
     } | null>(null);
     const [testLoading, setTestLoading] = useState(false);
-    const [channelFilter, setChannelFilter] = useState<
-        'all' | 'whatsapp' | 'telegram'
-    >('all');
-
-    const filteredContacts = useMemo(() => {
-        if (channelFilter === 'all') return contacts;
-        return contacts.filter(
-            (c) => (c.preferred_channel || 'whatsapp') === channelFilter
-        );
-    }, [contacts, channelFilter]);
 
     const recipientStats = useMemo(() => {
         const selectedContacts = new Set<number>();
@@ -100,20 +72,8 @@ export default function NotificationCreate({
         });
         data.contact_ids.forEach((id) => selectedContacts.add(id));
 
-        const selectedContactsList = contacts.filter((c) =>
-            selectedContacts.has(c.id)
-        );
-        const whatsappCount = selectedContactsList.filter(
-            (c) => (c.preferred_channel || 'whatsapp') === 'whatsapp'
-        ).length;
-        const telegramCount = selectedContactsList.filter(
-            (c) => c.preferred_channel === 'telegram'
-        ).length;
-
         return {
             total: selectedContacts.size,
-            whatsapp: whatsappCount,
-            telegram: telegramCount,
         };
     }, [data.group_ids, data.contact_ids, groups, contacts]);
 
@@ -158,7 +118,7 @@ export default function NotificationCreate({
     };
 
     const handleTest = async () => {
-        if (!testPhone || !data.content) return;
+        if (!testChatId || !data.content) return;
 
         setTestLoading(true);
         setTestResult(null);
@@ -174,8 +134,9 @@ export default function NotificationCreate({
                             ?.getAttribute('content') || '',
                 },
                 body: JSON.stringify({
-                    phone: testPhone,
+                    identifier: testChatId,
                     content: data.content,
+                    channel: 'telegram',
                 }),
             });
             const result = await response.json();
@@ -195,7 +156,7 @@ export default function NotificationCreate({
                 <div>
                     <h1 className="text-3xl font-bold">Nouvelle notification</h1>
                     <p className="text-muted-foreground">
-                        Composez et envoyez une notification WhatsApp
+                        Composez et envoyez une notification Telegram
                     </p>
                 </div>
 
@@ -361,69 +322,13 @@ export default function NotificationCreate({
                                         value="contacts"
                                         className="space-y-3 mt-4"
                                     >
-                                        <div className="flex gap-1 mb-3">
-                                            <Button
-                                                type="button"
-                                                variant={
-                                                    channelFilter === 'all'
-                                                        ? 'default'
-                                                        : 'outline'
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setChannelFilter('all')
-                                                }
-                                            >
-                                                Tous
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant={
-                                                    channelFilter === 'whatsapp'
-                                                        ? 'default'
-                                                        : 'outline'
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setChannelFilter('whatsapp')
-                                                }
-                                                className={
-                                                    channelFilter === 'whatsapp'
-                                                        ? 'bg-green-500 hover:bg-green-600'
-                                                        : ''
-                                                }
-                                            >
-                                                <MessageSquare className="h-3 w-3 mr-1" />
-                                                WhatsApp
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant={
-                                                    channelFilter === 'telegram'
-                                                        ? 'default'
-                                                        : 'outline'
-                                                }
-                                                size="sm"
-                                                onClick={() =>
-                                                    setChannelFilter('telegram')
-                                                }
-                                                className={
-                                                    channelFilter === 'telegram'
-                                                        ? 'bg-blue-500 hover:bg-blue-600'
-                                                        : ''
-                                                }
-                                            >
-                                                <Send className="h-3 w-3 mr-1" />
-                                                Telegram
-                                            </Button>
-                                        </div>
                                         <div className="max-h-64 overflow-y-auto space-y-3">
-                                            {filteredContacts.length === 0 ? (
+                                            {contacts.length === 0 ? (
                                                 <p className="text-sm text-muted-foreground">
                                                     Aucun contact disponible
                                                 </p>
                                             ) : (
-                                                filteredContacts.map(
+                                                contacts.map(
                                                     (contact) => (
                                                         <div
                                                             key={contact.id}
@@ -445,17 +350,15 @@ export default function NotificationCreate({
                                                                 className="font-normal flex items-center gap-2"
                                                             >
                                                                 {contact.name}
-                                                                <ChannelBadge
-                                                                    channel={
-                                                                        contact.preferred_channel ||
-                                                                        'whatsapp'
-                                                                    }
-                                                                />
+                                                                <Badge
+                                                                    variant="default"
+                                                                    className="bg-blue-500 hover:bg-blue-600"
+                                                                >
+                                                                    <Send className="h-3 w-3 mr-1" />
+                                                                    Telegram
+                                                                </Badge>
                                                                 <span className="text-muted-foreground text-xs">
-                                                                    {contact.preferred_channel ===
-                                                                    'telegram'
-                                                                        ? contact.telegram_chat_id
-                                                                        : contact.phone}
+                                                                    {contact.telegram_chat_id || 'Non lié'}
                                                                 </span>
                                                             </Label>
                                                         </div>
@@ -479,20 +382,10 @@ export default function NotificationCreate({
                                     </p>
                                     {recipientCount > 0 && (
                                         <p className="text-xs text-muted-foreground">
-                                            {recipientStats.whatsapp > 0 && (
-                                                <span className="inline-flex items-center mr-3">
-                                                    <MessageSquare className="h-3 w-3 mr-1 text-green-500" />
-                                                    {recipientStats.whatsapp}{' '}
-                                                    WhatsApp
-                                                </span>
-                                            )}
-                                            {recipientStats.telegram > 0 && (
-                                                <span className="inline-flex items-center">
-                                                    <Send className="h-3 w-3 mr-1 text-blue-500" />
-                                                    {recipientStats.telegram}{' '}
-                                                    Telegram
-                                                </span>
-                                            )}
+                                            <span className="inline-flex items-center">
+                                                <Send className="h-3 w-3 mr-1 text-blue-500" />
+                                                {recipientCount} Telegram
+                                            </span>
                                         </p>
                                     )}
                                 </div>
@@ -518,17 +411,17 @@ export default function NotificationCreate({
                     <DialogHeader>
                         <DialogTitle>Tester l'envoi</DialogTitle>
                         <DialogDescription>
-                            Envoyez un message de test à un numéro
+                            Envoyez un message de test à un Chat ID Telegram
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="test-phone">Numéro de test</Label>
+                            <Label htmlFor="test-chat-id">Chat ID Telegram</Label>
                             <Input
-                                id="test-phone"
-                                value={testPhone}
-                                onChange={(e) => setTestPhone(e.target.value)}
-                                placeholder="+33612345678"
+                                id="test-chat-id"
+                                value={testChatId}
+                                onChange={(e) => setTestChatId(e.target.value)}
+                                placeholder="123456789"
                             />
                         </div>
 
@@ -560,7 +453,7 @@ export default function NotificationCreate({
                         </Button>
                         <Button
                             onClick={handleTest}
-                            disabled={testLoading || !testPhone}
+                            disabled={testLoading || !testChatId}
                         >
                             {testLoading ? 'Envoi...' : 'Envoyer le test'}
                         </Button>

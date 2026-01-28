@@ -79,12 +79,6 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class, \Ap
         Route::post('/api-tokens', [Admin\ApiTokenController::class, 'store'])->name('api-tokens.store');
         Route::delete('/api-tokens/{apiToken}', [Admin\ApiTokenController::class, 'destroy'])->name('api-tokens.destroy');
 
-        // WhatsApp Connection
-        Route::get('/whatsapp', [Admin\WhatsAppController::class, 'index'])->name('whatsapp.index');
-        Route::get('/whatsapp/status', [Admin\WhatsAppController::class, 'status'])->name('whatsapp.status');
-        Route::post('/whatsapp/logout', [Admin\WhatsAppController::class, 'logout'])->name('whatsapp.logout');
-        Route::post('/whatsapp/reconnect', [Admin\WhatsAppController::class, 'reconnect'])->name('whatsapp.reconnect');
-
         // Documentation
         Route::get('/documentation/{page?}', [Admin\DocumentationController::class, 'index'])->name('documentation');
     });

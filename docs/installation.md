@@ -1,6 +1,6 @@
 # Installation
 
-Guide d'installation détaillé de WhatsApp Hub.
+Guide d'installation détaillé de Messaging Hub.
 
 ## Prérequis
 
@@ -47,7 +47,7 @@ Pour MySQL/PostgreSQL, modifiez `.env` :
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=whatsapp_hub
+DB_DATABASE=messaging_hub
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -89,18 +89,11 @@ Accédez à `http://localhost:8000`
 
 ```env
 # Application
-APP_NAME="WhatsApp Hub"
+APP_NAME="Messaging Hub"
 APP_URL=http://localhost:8000
 
 # Canal de messaging par défaut
-MESSAGING_CHANNEL=mock  # mock | whatsapp | whatsapp_baileys
-
-# WhatsApp Cloud API
-WHATSAPP_PHONE_NUMBER_ID=
-WHATSAPP_ACCESS_TOKEN=
-
-# WhatsApp Baileys (local)
-WHATSAPP_BAILEYS_URL=http://localhost:3001
+MESSAGING_CHANNEL=mock  # mock | telegram
 
 # Telegram
 TELEGRAM_BOT_TOKEN=
@@ -137,8 +130,8 @@ php artisan view:cache
 Utilisez Supervisor pour maintenir le worker actif :
 
 ```ini
-[program:whatsapp-hub-worker]
-command=php /var/www/whatsapp-hub/artisan queue:work --sleep=3 --tries=3
+[program:messaging-hub-worker]
+command=php /var/www/messaging-hub/artisan queue:work --sleep=3 --tries=3
 autostart=true
 autorestart=true
 user=www-data
@@ -148,8 +141,8 @@ numprocs=1
 ### 4. WebSocket (Reverb)
 
 ```ini
-[program:whatsapp-hub-reverb]
-command=php /var/www/whatsapp-hub/artisan reverb:start
+[program:messaging-hub-reverb]
+command=php /var/www/messaging-hub/artisan reverb:start
 autostart=true
 autorestart=true
 user=www-data
@@ -160,7 +153,7 @@ user=www-data
 Ajoutez au crontab :
 
 ```cron
-* * * * * cd /var/www/whatsapp-hub && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/messaging-hub && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ## Mise à jour

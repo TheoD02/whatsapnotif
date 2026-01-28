@@ -40,16 +40,6 @@ return [
         'default_country_code' => env('MESSAGING_DEFAULT_COUNTRY_CODE', '+33'),
     ],
 
-    'whatsapp' => [
-        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
-        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
-        'api_version' => env('WHATSAPP_API_VERSION', 'v17.0'),
-    ],
-
-    'whatsapp_baileys' => [
-        'url' => env('WHATSAPP_BAILEYS_URL', 'http://localhost:3001'),
-    ],
-
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),

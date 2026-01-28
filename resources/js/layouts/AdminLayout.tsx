@@ -13,7 +13,6 @@ import {
     X,
     LogOut,
     ChevronDown,
-    Smartphone,
     BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,7 +35,6 @@ const navigation = [
     { name: 'Groupes', href: '/admin/groups', icon: FolderOpen },
     { name: 'Templates', href: '/admin/templates', icon: FileText },
     { name: 'Tokens API', href: '/admin/api-tokens', icon: Key },
-    { name: 'WhatsApp', href: '/admin/whatsapp', icon: Smartphone },
     { name: 'Documentation', href: '/admin/documentation', icon: BookOpen },
 ];
 
@@ -77,7 +75,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             >
                 <div className="flex h-16 items-center gap-2 px-6 border-b border-sidebar-border">
                     <MessageSquare className="h-6 w-6 text-primary" />
-                    <span className="font-semibold text-lg">WhatsApp Hub</span>
+                    <span className="font-semibold text-lg">Messaging Hub</span>
                     <Button
                         variant="ghost"
                         size="icon"

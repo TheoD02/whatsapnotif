@@ -19,11 +19,6 @@ class DocumentationController extends Controller
             'file' => 'docs/installation.md',
             'icon' => 'download',
         ],
-        'whatsapp' => [
-            'title' => 'Configuration WhatsApp',
-            'file' => 'docs/whatsapp-setup.md',
-            'icon' => 'message-circle',
-        ],
         'telegram' => [
             'title' => 'Configuration Telegram',
             'file' => 'docs/telegram-setup.md',

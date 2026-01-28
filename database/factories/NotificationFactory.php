@@ -20,7 +20,7 @@ class NotificationFactory extends Factory
         return [
             'title' => fake()->sentence(3),
             'content' => fake()->paragraph(),
-            'channel' => MessagingChannel::WhatsApp,
+            'channel' => MessagingChannel::Telegram,
             'status' => NotificationStatus::Draft,
             'sent_by' => User::factory(),
         ];

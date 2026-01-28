@@ -19,7 +19,8 @@ class ContactFactory extends Factory
         return [
             'name' => fake()->name(),
             'phone' => Contact::formatPhone(fake()->phoneNumber()),
-            'preferred_channel' => MessagingChannel::WhatsApp,
+            'preferred_channel' => MessagingChannel::Telegram,
+            'telegram_chat_id' => (string) fake()->randomNumber(9),
             'is_active' => true,
             'metadata' => [],
         ];
@@ -37,13 +38,6 @@ class ContactFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'preferred_channel' => MessagingChannel::Telegram,
             'telegram_chat_id' => (string) fake()->randomNumber(9),
-        ]);
-    }
-
-    public function whatsapp(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'preferred_channel' => MessagingChannel::WhatsApp,
         ]);
     }
 

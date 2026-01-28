@@ -13,26 +13,23 @@ use App\Models\NotificationRecipient;
 use App\Models\User;
 use App\Services\Messaging\MockChannel;
 use App\Services\Messaging\TelegramChannel;
-use App\Services\Messaging\WhatsAppBaileysChannel;
-use App\Services\Messaging\WhatsAppCloudChannel;
 use Illuminate\Support\Collection;
 
 class NotificationService
 {
-    private MessagingChannel $defaultWhatsAppChannel;
+    private MessagingChannel $defaultChannel;
 
     public function __construct()
     {
-        $this->defaultWhatsAppChannel = $this->resolveWhatsAppChannel();
+        $this->defaultChannel = $this->resolveDefaultChannel();
     }
 
-    private function resolveWhatsAppChannel(): MessagingChannel
+    private function resolveDefaultChannel(): MessagingChannel
     {
         $channelName = config('services.messaging.default', 'mock');
 
         return match ($channelName) {
-            'whatsapp' => new WhatsAppCloudChannel,
-            'whatsapp_baileys' => new WhatsAppBaileysChannel,
+            'telegram' => new TelegramChannel,
             default => new MockChannel,
         };
     }
@@ -41,7 +38,7 @@ class NotificationService
     {
         return match ($contact->preferred_channel) {
             MessagingChannelEnum::Telegram => new TelegramChannel,
-            default => $this->defaultWhatsAppChannel,
+            default => $this->defaultChannel,
         };
     }
 
@@ -52,7 +49,7 @@ class NotificationService
         array $groupIds = [],
         ?int $templateId = null,
         ?string $title = null,
-        MessagingChannelEnum $channel = MessagingChannelEnum::WhatsApp
+        MessagingChannelEnum $channel = MessagingChannelEnum::Telegram
     ): Notification {
         $notification = Notification::create([
             'title' => $title,
@@ -140,11 +137,11 @@ class NotificationService
         }
     }
 
-    public function sendTest(string $identifier, string $message, MessagingChannelEnum $channel = MessagingChannelEnum::WhatsApp): array
+    public function sendTest(string $identifier, string $message, MessagingChannelEnum $channel = MessagingChannelEnum::Telegram): array
     {
         $channelInstance = match ($channel) {
             MessagingChannelEnum::Telegram => new TelegramChannel,
-            default => $this->defaultWhatsAppChannel,
+            default => $this->defaultChannel,
         };
 
         $result = $channelInstance->send($identifier, $message);

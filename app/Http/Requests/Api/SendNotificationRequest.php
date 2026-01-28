@@ -27,7 +27,7 @@ class SendNotificationRequest extends FormRequest
             'recipients.group_ids.*' => ['integer', 'exists:groups,id'],
             'recipients.phones' => ['nullable', 'array'],
             'recipients.phones.*' => ['string', 'max:20'],
-            'channel' => ['nullable', 'string', 'in:whatsapp,telegram'],
+            'channel' => ['nullable', 'string', 'in:telegram'],
         ];
     }
 
@@ -44,7 +44,7 @@ class SendNotificationRequest extends FormRequest
             'recipients.contact_ids' => 'Liste des IDs de contacts existants',
             'recipients.group_ids' => 'Liste des IDs de groupes (tous les contacts du groupe recevront le message)',
             'recipients.phones' => 'Liste de numéros de téléphone (crée automatiquement les contacts)',
-            'channel' => 'Canal de communication forcé (whatsapp ou telegram). Si non spécifié, utilise le canal préféré du contact.',
+            'channel' => 'Canal de communication forcé (telegram). Si non spécifié, utilise le canal préféré du contact.',
         ];
     }
 }

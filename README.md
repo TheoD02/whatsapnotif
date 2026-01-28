@@ -1,10 +1,10 @@
-# WhatsApp Hub
+# Messaging Hub
 
-Plateforme de notifications multi-canal (WhatsApp & Telegram) avec interface d'administration.
+Plateforme de notifications Telegram avec interface d'administration.
 
 ## Fonctionnalités
 
-- **Multi-canal** : Envoi de notifications via WhatsApp et Telegram
+- **Telegram** : Envoi de notifications via Telegram
 - **Gestion des contacts** : Import CSV, groupes, métadonnées personnalisées
 - **Templates** : Messages réutilisables avec variables dynamiques
 - **Interface Admin** : Gestion complète des utilisateurs, contacts, groupes
@@ -18,7 +18,7 @@ Plateforme de notifications multi-canal (WhatsApp & Telegram) avec interface d'a
 - **Frontend** : React, TypeScript, Inertia.js, Tailwind CSS, shadcn/ui
 - **Base de données** : SQLite (dev) / MySQL / PostgreSQL
 - **WebSocket** : Laravel Reverb
-- **Messaging** : WhatsApp Cloud API / Baileys, Telegram Bot API
+- **Messaging** : Telegram Bot API
 
 ## Installation rapide
 
@@ -46,13 +46,6 @@ L'application sera disponible sur `http://localhost:8000`
 
 ## Configuration des canaux
 
-### WhatsApp
-
-Deux options disponibles :
-
-1. **WhatsApp Cloud API** (Production) - Voir [docs/whatsapp-setup.md](docs/whatsapp-setup.md)
-2. **Baileys** (Développement) - Service Node.js local
-
 ### Telegram
 
 Configuration du bot et liaison automatique des contacts via QR code.
@@ -69,7 +62,7 @@ app/
 │   └── Api/            # API REST
 ├── Models/             # Eloquent models
 ├── Services/
-│   ├── Messaging/      # Canaux (WhatsApp, Telegram, Mock)
+│   ├── Messaging/      # Canaux (Telegram, Mock)
 │   └── NotificationService.php
 └── Events/             # Broadcasting events
 
@@ -110,7 +103,6 @@ npm run build         # Build production
 ## Documentation
 
 - [Installation détaillée](docs/installation.md)
-- [Configuration WhatsApp](docs/whatsapp-setup.md)
 - [Configuration Telegram](docs/telegram-setup.md)
 - [API Reference](docs/api.md)
 

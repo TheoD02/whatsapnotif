@@ -10,7 +10,7 @@ export default function GuestLayout({ children }: PropsWithChildren) {
                     <Link href="/" className="flex items-center gap-2">
                         <MessageSquare className="h-10 w-10 text-primary" />
                         <span className="text-2xl font-bold">
-                            WhatsApp Hub
+                            Messaging Hub
                         </span>
                     </Link>
                 </div>

@@ -19,7 +19,7 @@ class TestMessageRequest extends FormRequest
         return [
             'identifier' => ['required', 'string'],
             'message' => ['required', 'string', 'max:4096'],
-            'channel' => ['required', 'in:whatsapp,telegram'],
+            'channel' => ['required', 'in:telegram'],
         ];
     }
 }

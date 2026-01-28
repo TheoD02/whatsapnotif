@@ -14,24 +14,6 @@ test('admin can view contacts list', function () {
         ->assertStatus(200);
 });
 
-test('admin can create whatsapp contact', function () {
-    $admin = User::factory()->admin()->create();
-
-    $this->actingAs($admin)
-        ->post('/admin/contacts', [
-            'name' => 'John Doe',
-            'phone' => '0612345678',
-            'preferred_channel' => MessagingChannel::WhatsApp->value,
-        ])
-        ->assertRedirect();
-
-    $this->assertDatabaseHas('contacts', [
-        'name' => 'John Doe',
-        'phone' => '+33612345678',
-        'preferred_channel' => MessagingChannel::WhatsApp->value,
-    ]);
-});
-
 test('admin can create telegram contact', function () {
     $admin = User::factory()->admin()->create();
 
@@ -83,8 +65,7 @@ test('admin can assign contact to groups', function () {
     $this->actingAs($admin)
         ->post('/admin/contacts', [
             'name' => 'Grouped Contact',
-            'phone' => '0698765432',
-            'preferred_channel' => MessagingChannel::WhatsApp->value,
+            'preferred_channel' => MessagingChannel::Telegram->value,
             'group_ids' => [$group->id],
         ])
         ->assertRedirect();

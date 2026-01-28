@@ -7,9 +7,7 @@ import {
     MoreHorizontal,
     Edit,
     Trash2,
-    Phone,
     Send,
-    MessageSquare,
     Link as LinkIcon,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
@@ -49,26 +47,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import TelegramLinkDialog from '@/components/TelegramLinkDialog';
-import type { Contact, Group, PaginatedData, PreferredChannel } from '@/types';
-import { formatPhone } from '@/lib/utils';
-
-const ChannelBadge = ({ channel }: { channel: PreferredChannel }) => (
-    <Badge
-        variant={channel === 'telegram' ? 'default' : 'secondary'}
-        className={
-            channel === 'telegram'
-                ? 'bg-blue-500 hover:bg-blue-600'
-                : 'bg-green-500 hover:bg-green-600 text-white'
-        }
-    >
-        {channel === 'telegram' ? (
-            <Send className="h-3 w-3 mr-1" />
-        ) : (
-            <MessageSquare className="h-3 w-3 mr-1" />
-        )}
-        {channel === 'telegram' ? 'Telegram' : 'WhatsApp'}
-    </Badge>
-);
+import type { Contact, Group, PaginatedData } from '@/types';
 
 interface Props {
     contacts: PaginatedData<Contact>;
@@ -154,10 +133,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
         setTestLoading(true);
         setTestResult(null);
 
-        const identifier =
-            testContact.preferred_channel === 'telegram'
-                ? testContact.telegram_chat_id
-                : testContact.phone;
+        const identifier = testContact.telegram_chat_id;
 
         try {
             const response = await fetch('/admin/contacts/test-message', {
@@ -172,7 +148,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                 body: JSON.stringify({
                     identifier,
                     message: testMessage,
-                    channel: testContact.preferred_channel || 'whatsapp',
+                    channel: 'telegram',
                 }),
             });
             const result = await response.json();
@@ -193,7 +169,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                     <div>
                         <h1 className="text-3xl font-bold">Contacts</h1>
                         <p className="text-muted-foreground">
-                            Gérez vos contacts WhatsApp et Telegram
+                            Gérez vos contacts Telegram
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -290,29 +266,18 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                                             {contact.name}
                                         </TableCell>
                                         <TableCell>
-                                            <ChannelBadge
-                                                channel={
-                                                    contact.preferred_channel ||
-                                                    'whatsapp'
-                                                }
-                                            />
+                                            <Badge
+                                                variant="default"
+                                                className="bg-blue-500 hover:bg-blue-600"
+                                            >
+                                                <Send className="h-3 w-3 mr-1" />
+                                                Telegram
+                                            </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                {contact.preferred_channel ===
-                                                'telegram' ? (
-                                                    <>
-                                                        <Send className="h-4 w-4" />
-                                                        {contact.telegram_chat_id}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Phone className="h-4 w-4" />
-                                                        {formatPhone(
-                                                            contact.phone
-                                                        )}
-                                                    </>
-                                                )}
+                                                <Send className="h-4 w-4" />
+                                                {contact.telegram_chat_id || 'Non lié'}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -434,8 +399,7 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                         <DialogTitle>Importer des contacts</DialogTitle>
                         <DialogDescription>
                             Importez des contacts depuis un fichier CSV. Le
-                            fichier doit contenir les colonnes "name" et
-                            "phone".
+                            fichier doit contenir la colonne "name".
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
@@ -497,25 +461,13 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                     <DialogHeader>
                         <DialogTitle>Envoyer un message test</DialogTitle>
                         <DialogDescription>
-                            Envoyez un message de test à {testContact?.name} via{' '}
-                            {testContact?.preferred_channel === 'telegram'
-                                ? 'Telegram'
-                                : 'WhatsApp'}
+                            Envoyez un message de test à {testContact?.name} via Telegram
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            {testContact?.preferred_channel === 'telegram' ? (
-                                <>
-                                    <Send className="h-4 w-4" />
-                                    Chat ID: {testContact?.telegram_chat_id}
-                                </>
-                            ) : (
-                                <>
-                                    <Phone className="h-4 w-4" />
-                                    {formatPhone(testContact?.phone || '')}
-                                </>
-                            )}
+                            <Send className="h-4 w-4" />
+                            Chat ID: {testContact?.telegram_chat_id || 'Non lié'}
                         </div>
 
                         <div className="space-y-2">

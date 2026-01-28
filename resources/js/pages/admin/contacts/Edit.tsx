@@ -14,13 +14,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import TelegramLinkDialog from '@/components/TelegramLinkDialog';
 import type { Contact, Group, PreferredChannel } from '@/types';
 
@@ -36,7 +29,7 @@ export default function ContactEdit({ contact, groups }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         name: contact.name,
         phone: contact.phone,
-        preferred_channel: contact.preferred_channel || 'whatsapp',
+        preferred_channel: 'telegram' as PreferredChannel,
         telegram_chat_id: contact.telegram_chat_id || '',
         is_active: contact.is_active,
         group_ids: contact.groups?.map((g) => g.id) || [],
@@ -102,119 +95,72 @@ export default function ContactEdit({ contact, groups }: Props) {
                                 )}
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="preferred_channel">
-                                    Canal de communication
-                                </Label>
-                                <Select
-                                    value={data.preferred_channel}
-                                    onValueChange={(value: PreferredChannel) =>
-                                        setData('preferred_channel', value)
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="whatsapp">
-                                            WhatsApp
-                                        </SelectItem>
-                                        <SelectItem value="telegram">
-                                            Telegram
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {data.preferred_channel === 'whatsapp' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Téléphone</Label>
-                                    <Input
-                                        id="phone"
-                                        value={data.phone}
-                                        onChange={(e) =>
-                                            setData('phone', e.target.value)
-                                        }
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Format international recommandé
-                                    </p>
-                                    {errors.phone && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.phone}
-                                        </p>
+                            <div className="space-y-3">
+                                <Label>Compte Telegram</Label>
+                                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                    {isLinked ? (
+                                        <>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="default"
+                                                        className="bg-green-500"
+                                                    >
+                                                        <Check className="h-3 w-3 mr-1" />
+                                                        Lié
+                                                    </Badge>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        Chat ID:{' '}
+                                                        {
+                                                            currentContact.telegram_chat_id
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setTelegramLinkOpen(
+                                                        true
+                                                    )
+                                                }
+                                            >
+                                                <LinkIcon className="h-4 w-4 mr-1" />
+                                                Relier
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="secondary">
+                                                        Non lié
+                                                    </Badge>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        Aucun compte
+                                                        Telegram associé
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="default"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setTelegramLinkOpen(
+                                                        true
+                                                    )
+                                                }
+                                            >
+                                                <Send className="h-4 w-4 mr-1" />
+                                                Lier Telegram
+                                            </Button>
+                                        </>
                                     )}
                                 </div>
-                            )}
-
-                            {data.preferred_channel === 'telegram' && (
-                                <div className="space-y-3">
-                                    <Label>Compte Telegram</Label>
-                                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                                        {isLinked ? (
-                                            <>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge
-                                                            variant="default"
-                                                            className="bg-green-500"
-                                                        >
-                                                            <Check className="h-3 w-3 mr-1" />
-                                                            Lié
-                                                        </Badge>
-                                                        <span className="text-sm text-muted-foreground">
-                                                            Chat ID:{' '}
-                                                            {
-                                                                currentContact.telegram_chat_id
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setTelegramLinkOpen(
-                                                            true
-                                                        )
-                                                    }
-                                                >
-                                                    <LinkIcon className="h-4 w-4 mr-1" />
-                                                    Relier
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge variant="secondary">
-                                                            Non lié
-                                                        </Badge>
-                                                        <span className="text-sm text-muted-foreground">
-                                                            Aucun compte
-                                                            Telegram associé
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    type="button"
-                                                    variant="default"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setTelegramLinkOpen(
-                                                            true
-                                                        )
-                                                    }
-                                                >
-                                                    <Send className="h-4 w-4 mr-1" />
-                                                    Lier Telegram
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                            </div>
 
                             <div className="flex items-center space-x-2">
                                 <Checkbox

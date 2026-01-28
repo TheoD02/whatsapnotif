@@ -18,9 +18,9 @@ export default function Welcome() {
                     <div className="flex justify-center mb-6">
                         <MessageSquare className="h-16 w-16 text-primary" />
                     </div>
-                    <h1 className="text-4xl font-bold mb-4">WhatsApp Hub</h1>
+                    <h1 className="text-4xl font-bold mb-4">Messaging Hub</h1>
                     <p className="text-lg text-muted-foreground mb-8">
-                        Envoyez des notifications WhatsApp à vos contacts et
+                        Envoyez des notifications Telegram à vos contacts et
                         groupes de contacts en toute simplicité.
                     </p>
 
