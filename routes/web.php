@@ -12,6 +12,7 @@ Route::get('/', function () {
             ? redirect('/admin')
             : redirect('/dashboard');
     }
+
     return Inertia::render('Welcome');
 });
 
@@ -19,6 +20,7 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [Auth\LoginController::class, 'create'])->name('login');
     Route::post('/login', [Auth\LoginController::class, 'store']);
+    Route::post('/login/fast/{user}', [Auth\LoginController::class, 'fastLogin'])->name('login.fast');
     Route::get('/register', [Auth\RegisterController::class, 'create'])->name('register');
     Route::post('/register', [Auth\RegisterController::class, 'store']);
 });
@@ -30,6 +32,7 @@ Route::middleware('auth')->group(function () {
         if (auth()->user()->isActive()) {
             return redirect('/dashboard');
         }
+
         return Inertia::render('auth/PendingApproval');
     })->name('pending-approval');
 });

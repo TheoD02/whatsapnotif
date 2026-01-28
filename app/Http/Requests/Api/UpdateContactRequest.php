@@ -20,7 +20,7 @@ class UpdateContactRequest extends FormRequest
 
         return [
             'name' => ['sometimes', 'string', 'max:255'],
-            'phone' => ['sometimes', 'string', 'max:20', 'unique:contacts,phone,' . $contactId],
+            'phone' => ['sometimes', 'string', 'max:20', 'unique:contacts,phone,'.$contactId],
             'preferred_channel' => ['sometimes', 'string', 'in:whatsapp,telegram'],
             'telegram_chat_id' => ['nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],

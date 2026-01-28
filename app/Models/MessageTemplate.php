@@ -38,6 +38,7 @@ class MessageTemplate extends Model
     public function getVariables(): array
     {
         preg_match_all('/\{\{\s*(\w+)\s*\}\}/', $this->content, $matches);
+
         return array_unique($matches[1]);
     }
 
@@ -46,7 +47,7 @@ class MessageTemplate extends Model
         $content = $this->content;
 
         foreach ($data as $key => $value) {
-            $content = preg_replace('/\{\{\s*' . preg_quote($key, '/') . '\s*\}\}/', $value, $content);
+            $content = preg_replace('/\{\{\s*'.preg_quote($key, '/').'\s*\}\}/', $value, $content);
         }
 
         return $content;

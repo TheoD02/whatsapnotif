@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import GuestLayout from '@/layouts/GuestLayout';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,20 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-export default function Login() {
+interface DevUser {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+}
+
+interface Props {
+    devUsers?: DevUser[];
+}
+
+export default function Login({ devUsers }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
@@ -25,9 +37,49 @@ export default function Login() {
         post('/login');
     };
 
+    const handleFastLogin = (userId: number) => {
+        router.post(`/login/fast/${userId}`);
+    };
+
     return (
         <GuestLayout>
             <Head title="Connexion" />
+
+            {devUsers && devUsers.length > 0 && (
+                <Card className="mb-4 border-dashed border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <span className="text-amber-600">⚡</span>
+                            Fast Login
+                            <Badge variant="outline" className="ml-auto text-xs font-normal text-amber-600 border-amber-300">
+                                DEV
+                            </Badge>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                        <div className="flex flex-wrap gap-2">
+                            {devUsers.map((user) => (
+                                <Button
+                                    key={user.id}
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleFastLogin(user.id)}
+                                    className="h-auto py-1.5 px-3"
+                                >
+                                    <span className="font-medium">{user.name}</span>
+                                    <Badge
+                                        variant={user.role === 'admin' ? 'default' : 'secondary'}
+                                        className="ml-2 text-[10px] px-1.5"
+                                    >
+                                        {user.role}
+                                    </Badge>
+                                </Button>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             <Card>
                 <CardHeader>
                     <CardTitle>Connexion</CardTitle>

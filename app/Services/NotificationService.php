@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Contracts\MessagingChannel;
+use App\Enums\MessagingChannel as MessagingChannelEnum;
+use App\Enums\NotificationStatus;
+use App\Enums\RecipientStatus;
 use App\Models\Contact;
-use App\Models\Group;
 use App\Models\MessageTemplate;
 use App\Models\Notification;
 use App\Models\NotificationRecipient;
@@ -29,16 +31,16 @@ class NotificationService
         $channelName = config('services.messaging.default', 'mock');
 
         return match ($channelName) {
-            'whatsapp' => new WhatsAppCloudChannel(),
-            'whatsapp_baileys' => new WhatsAppBaileysChannel(),
-            default => new MockChannel(),
+            'whatsapp' => new WhatsAppCloudChannel,
+            'whatsapp_baileys' => new WhatsAppBaileysChannel,
+            default => new MockChannel,
         };
     }
 
     private function getChannelForContact(Contact $contact): MessagingChannel
     {
         return match ($contact->preferred_channel) {
-            'telegram' => new TelegramChannel(),
+            MessagingChannelEnum::Telegram => new TelegramChannel,
             default => $this->defaultWhatsAppChannel,
         };
     }
@@ -50,14 +52,14 @@ class NotificationService
         array $groupIds = [],
         ?int $templateId = null,
         ?string $title = null,
-        string $channel = 'whatsapp'
+        MessagingChannelEnum $channel = MessagingChannelEnum::WhatsApp
     ): Notification {
         $notification = Notification::create([
             'title' => $title,
             'content' => $content,
             'template_id' => $templateId,
             'channel' => $channel,
-            'status' => 'draft',
+            'status' => NotificationStatus::Draft,
             'sent_by' => $user->id,
         ]);
 
@@ -67,7 +69,7 @@ class NotificationService
             NotificationRecipient::create([
                 'notification_id' => $notification->id,
                 'contact_id' => $contact->id,
-                'status' => 'pending',
+                'status' => RecipientStatus::Pending,
             ]);
         }
 
@@ -78,13 +80,13 @@ class NotificationService
     {
         $contacts = collect();
 
-        if (!empty($contactIds)) {
+        if (! empty($contactIds)) {
             $contacts = $contacts->merge(
                 Contact::whereIn('id', $contactIds)->where('is_active', true)->get()
             );
         }
 
-        if (!empty($groupIds)) {
+        if (! empty($groupIds)) {
             $groupContacts = Contact::whereHas('groups', function ($query) use ($groupIds) {
                 $query->whereIn('groups.id', $groupIds);
             })->where('is_active', true)->get();
@@ -112,8 +114,9 @@ class NotificationService
     {
         $contact = $recipient->contact;
 
-        if (!$contact || !$contact->is_active) {
+        if (! $contact || ! $contact->is_active) {
             $recipient->markAsFailed('Contact inactif ou supprimé');
+
             return;
         }
 
@@ -122,6 +125,7 @@ class NotificationService
 
         if (empty($identifier)) {
             $recipient->markAsFailed('Identifiant de contact manquant');
+
             return;
         }
 
@@ -136,10 +140,10 @@ class NotificationService
         }
     }
 
-    public function sendTest(string $identifier, string $message, string $channel = 'whatsapp'): array
+    public function sendTest(string $identifier, string $message, MessagingChannelEnum $channel = MessagingChannelEnum::WhatsApp): array
     {
         $channelInstance = match ($channel) {
-            'telegram' => new TelegramChannel(),
+            MessagingChannelEnum::Telegram => new TelegramChannel,
             default => $this->defaultWhatsAppChannel,
         };
 
@@ -167,7 +171,7 @@ class NotificationService
         }
 
         foreach ($replacements as $key => $value) {
-            $content = preg_replace('/\{\{\s*' . preg_quote($key, '/') . '\s*\}\}/i', $value, $content);
+            $content = preg_replace('/\{\{\s*'.preg_quote($key, '/').'\s*\}\}/i', $value, $content);
         }
 
         return $content;

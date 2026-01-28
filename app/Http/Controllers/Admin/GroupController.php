@@ -39,7 +39,7 @@ class GroupController extends Controller
         $baseSlug = $validated['slug'];
         $counter = 1;
         while (Group::where('slug', $validated['slug'])->exists()) {
-            $validated['slug'] = $baseSlug . '-' . $counter++;
+            $validated['slug'] = $baseSlug.'-'.$counter++;
         }
 
         Group::create($validated);

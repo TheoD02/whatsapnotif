@@ -37,6 +37,7 @@ return [
 
     'messaging' => [
         'default' => env('MESSAGING_CHANNEL', 'mock'),
+        'default_country_code' => env('MESSAGING_DEFAULT_COUNTRY_CODE', '+33'),
     ],
 
     'whatsapp' => [

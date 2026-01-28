@@ -17,7 +17,7 @@ class HistoryController extends Controller
         $query = Notification::with('sender')
             ->withCount('recipients');
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $query->where('sent_by', $user->id);
         }
 
@@ -55,7 +55,7 @@ class HistoryController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->isAdmin() && $notification->sent_by !== $user->id) {
+        if (! $user->isAdmin() && $notification->sent_by !== $user->id) {
             abort(403);
         }
 

@@ -17,7 +17,7 @@ class MockChannel implements MessagingChannel
     {
         $phone = $this->formatPhone($phone);
 
-        if (!$this->validatePhone($phone)) {
+        if (! $this->validatePhone($phone)) {
             return SendResult::failure('Numéro de téléphone invalide');
         }
 
@@ -33,7 +33,8 @@ class MockChannel implements MessagingChannel
 
         // Simulate 95% success rate
         if (rand(1, 100) <= 95) {
-            $messageId = 'mock_' . Str::random(24);
+            $messageId = 'mock_'.Str::random(24);
+
             return SendResult::success($messageId, [
                 'simulated' => true,
             ]);
@@ -45,6 +46,7 @@ class MockChannel implements MessagingChannel
     public function validatePhone(string $phone): bool
     {
         $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
         return strlen($cleaned) >= 10 && strlen($cleaned) <= 15;
     }
 
@@ -53,11 +55,11 @@ class MockChannel implements MessagingChannel
         $phone = preg_replace('/[^0-9+]/', '', $phone);
 
         if (str_starts_with($phone, '0')) {
-            $phone = '+33' . substr($phone, 1);
+            $phone = '+33'.substr($phone, 1);
         }
 
-        if (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        if (! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         return $phone;

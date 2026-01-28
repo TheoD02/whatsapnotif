@@ -36,6 +36,7 @@ class TemplateResource extends JsonResource
     private function extractVariables(): array
     {
         preg_match_all('/\{\{(\w+)\}\}/', $this->content, $matches);
+
         return array_unique($matches[1] ?? []);
     }
 }

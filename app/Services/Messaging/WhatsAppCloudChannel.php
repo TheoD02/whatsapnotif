@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Log;
 class WhatsAppCloudChannel implements MessagingChannel
 {
     private string $phoneNumberId;
+
     private string $accessToken;
+
     private string $apiVersion;
 
     public function __construct()
@@ -32,7 +34,7 @@ class WhatsAppCloudChannel implements MessagingChannel
 
         $phone = $this->formatPhone($phone);
 
-        if (!$this->validatePhone($phone)) {
+        if (! $this->validatePhone($phone)) {
             return SendResult::failure('Numéro de téléphone invalide');
         }
 
@@ -84,6 +86,7 @@ class WhatsAppCloudChannel implements MessagingChannel
     public function validatePhone(string $phone): bool
     {
         $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
         return strlen($cleaned) >= 10 && strlen($cleaned) <= 15;
     }
 
@@ -92,11 +95,11 @@ class WhatsAppCloudChannel implements MessagingChannel
         $phone = preg_replace('/[^0-9+]/', '', $phone);
 
         if (str_starts_with($phone, '0')) {
-            $phone = '+33' . substr($phone, 1);
+            $phone = '+33'.substr($phone, 1);
         }
 
-        if (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        if (! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         return $phone;

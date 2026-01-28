@@ -52,10 +52,10 @@ class NotificationController extends Controller
         $user = auth()->user();
 
         // Verify user has permission to send to these groups
-        if (!$user->isAdmin() && !empty($validated['group_ids'])) {
+        if (! $user->isAdmin() && ! empty($validated['group_ids'])) {
             $allowedGroupIds = $user->allowedGroups()->pluck('id')->toArray();
             foreach ($validated['group_ids'] as $groupId) {
-                if (!in_array($groupId, $allowedGroupIds)) {
+                if (! in_array($groupId, $allowedGroupIds)) {
                     return back()->withErrors(['group_ids' => 'Vous n\'avez pas accès à ce groupe.']);
                 }
             }

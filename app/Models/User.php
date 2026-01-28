@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -32,6 +34,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
         ];
     }
 
@@ -62,22 +66,22 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === UserRole::Admin;
     }
 
     public function isOperator(): bool
     {
-        return $this->role === 'operator';
+        return $this->role === UserRole::Operator;
     }
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === UserStatus::Active;
     }
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === UserStatus::Pending;
     }
 
     public function canAccessGroup(Group $group): bool

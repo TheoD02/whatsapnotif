@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +17,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
-            'role' => 'admin',
-            'status' => 'active',
+            'role' => UserRole::Admin,
+            'status' => UserStatus::Active,
         ]);
 
         // Create sample operator
@@ -24,8 +26,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Operator',
             'email' => 'operator@example.com',
             'password' => Hash::make('password'),
-            'role' => 'operator',
-            'status' => 'active',
+            'role' => UserRole::Operator,
+            'status' => UserStatus::Active,
         ]);
     }
 }

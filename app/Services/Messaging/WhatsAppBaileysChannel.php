@@ -57,6 +57,7 @@ class WhatsAppBaileysChannel implements MessagingChannel
     public function validatePhone(string $phone): bool
     {
         $cleaned = preg_replace('/[^0-9+]/', '', $phone);
+
         return preg_match('/^\+?[1-9]\d{6,14}$/', $cleaned) === 1;
     }
 
@@ -64,8 +65,8 @@ class WhatsAppBaileysChannel implements MessagingChannel
     {
         $cleaned = preg_replace('/[^0-9+]/', '', $phone);
 
-        if (!str_starts_with($cleaned, '+')) {
-            $cleaned = '+' . $cleaned;
+        if (! str_starts_with($cleaned, '+')) {
+            $cleaned = '+'.$cleaned;
         }
 
         return $cleaned;
@@ -75,11 +76,12 @@ class WhatsAppBaileysChannel implements MessagingChannel
     {
         try {
             $response = Http::timeout(5)->get("{$this->serviceUrl}/status");
+
             return $response->json();
         } catch (\Exception $e) {
             return [
                 'status' => 'error',
-                'error' => 'Service not reachable: ' . $e->getMessage(),
+                'error' => 'Service not reachable: '.$e->getMessage(),
             ];
         }
     }
@@ -103,6 +105,7 @@ class WhatsAppBaileysChannel implements MessagingChannel
     {
         try {
             $response = Http::timeout(10)->post("{$this->serviceUrl}/logout");
+
             return $response->json()['success'] ?? false;
         } catch (\Exception $e) {
             return false;
@@ -113,6 +116,7 @@ class WhatsAppBaileysChannel implements MessagingChannel
     {
         try {
             $response = Http::timeout(10)->post("{$this->serviceUrl}/reconnect");
+
             return $response->json()['success'] ?? false;
         } catch (\Exception $e) {
             return false;

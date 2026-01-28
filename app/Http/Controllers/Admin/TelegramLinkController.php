@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Models\TelegramLinkToken;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class TelegramLinkController extends Controller
 {
@@ -30,7 +29,7 @@ class TelegramLinkController extends Controller
             ->latest()
             ->first();
 
-        if (!$token) {
+        if (! $token) {
             return response()->json([
                 'has_token' => false,
             ]);
@@ -63,7 +62,7 @@ class TelegramLinkController extends Controller
             ]);
         }
 
-        if (!$token || $token->expires_at->isPast()) {
+        if (! $token || $token->expires_at->isPast()) {
             return response()->json([
                 'pending' => false,
                 'linked' => false,

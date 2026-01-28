@@ -63,7 +63,7 @@ class ContactController extends Controller
     {
         $validated = $request->validated();
 
-        if (!empty($validated['phone'])) {
+        if (! empty($validated['phone'])) {
             $validated['phone'] = Contact::formatPhone($validated['phone']);
         }
 
@@ -75,7 +75,7 @@ class ContactController extends Controller
             'metadata' => $validated['metadata'] ?? [],
         ]);
 
-        if (!empty($validated['group_ids'])) {
+        if (! empty($validated['group_ids'])) {
             $contact->groups()->sync($validated['group_ids']);
         }
 
@@ -98,7 +98,7 @@ class ContactController extends Controller
     {
         $validated = $request->validated();
 
-        if (!empty($validated['phone'])) {
+        if (! empty($validated['phone'])) {
             $validated['phone'] = Contact::formatPhone($validated['phone']);
         }
 
@@ -147,6 +147,7 @@ class ContactController extends Controller
 
             if (empty($name) || empty($phone)) {
                 $errors++;
+
                 continue;
             }
 

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Messaging\WhatsAppBaileysChannel;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WhatsAppController extends Controller

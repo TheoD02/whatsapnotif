@@ -40,12 +40,14 @@ class TelegramWebhookController extends Controller
             } else {
                 $this->handleStartCommand($chatId, $firstName);
             }
+
             return;
         }
 
         // Handle code input (6 characters)
         if (preg_match('/^[A-Z0-9]{6}$/i', trim($text))) {
             $this->handleCodeInput($chatId, strtoupper(trim($text)), $firstName);
+
             return;
         }
 
@@ -57,11 +59,11 @@ class TelegramWebhookController extends Controller
     {
         $this->sendMessage(
             $chatId,
-            "Bienvenue {$firstName} !\n\n" .
-            "Ce bot vous permet de recevoir des notifications.\n\n" .
-            "Pour lier votre compte :\n" .
-            "1. Demandez un lien ou code à l'administrateur\n" .
-            "2. Cliquez sur le lien ou envoyez le code ici\n\n" .
+            "Bienvenue {$firstName} !\n\n".
+            "Ce bot vous permet de recevoir des notifications.\n\n".
+            "Pour lier votre compte :\n".
+            "1. Demandez un lien ou code à l'administrateur\n".
+            "2. Cliquez sur le lien ou envoyez le code ici\n\n".
             "Votre Chat ID : `{$chatId}`"
         );
     }
@@ -72,13 +74,15 @@ class TelegramWebhookController extends Controller
             ->where('status', 'pending')
             ->first();
 
-        if (!$linkToken) {
+        if (! $linkToken) {
             $this->sendMessage($chatId, "Ce lien n'est plus valide ou a expiré.\n\nDemandez un nouveau lien à l'administrateur.");
+
             return;
         }
 
-        if (!$linkToken->isValid()) {
+        if (! $linkToken->isValid()) {
             $this->sendMessage($chatId, "Ce lien a expiré.\n\nDemandez un nouveau lien à l'administrateur.");
+
             return;
         }
 
@@ -87,9 +91,9 @@ class TelegramWebhookController extends Controller
         $contactName = $linkToken->contact->name;
         $this->sendMessage(
             $chatId,
-            "Compte lié avec succès !\n\n" .
-            "Bonjour {$firstName}, vous êtes maintenant enregistré en tant que **{$contactName}**.\n\n" .
-            "Vous recevrez désormais les notifications sur Telegram."
+            "Compte lié avec succès !\n\n".
+            "Bonjour {$firstName}, vous êtes maintenant enregistré en tant que **{$contactName}**.\n\n".
+            'Vous recevrez désormais les notifications sur Telegram.'
         );
     }
 
@@ -99,13 +103,15 @@ class TelegramWebhookController extends Controller
             ->where('status', 'pending')
             ->first();
 
-        if (!$linkToken) {
+        if (! $linkToken) {
             $this->sendMessage($chatId, "Code invalide ou expiré.\n\nVérifiez le code et réessayez.");
+
             return;
         }
 
-        if (!$linkToken->isValid()) {
+        if (! $linkToken->isValid()) {
             $this->sendMessage($chatId, "Ce code a expiré.\n\nDemandez un nouveau code à l'administrateur.");
+
             return;
         }
 
@@ -114,15 +120,15 @@ class TelegramWebhookController extends Controller
         $contactName = $linkToken->contact->name;
         $this->sendMessage(
             $chatId,
-            "Compte lié avec succès !\n\n" .
-            "Bonjour {$firstName}, vous êtes maintenant enregistré en tant que **{$contactName}**.\n\n" .
-            "Vous recevrez désormais les notifications sur Telegram."
+            "Compte lié avec succès !\n\n".
+            "Bonjour {$firstName}, vous êtes maintenant enregistré en tant que **{$contactName}**.\n\n".
+            'Vous recevrez désormais les notifications sur Telegram.'
         );
     }
 
     private function sendMessage(string $chatId, string $message): void
     {
-        $telegram = new TelegramChannel();
+        $telegram = new TelegramChannel;
         $telegram->send($chatId, $message, ['parse_mode' => 'Markdown']);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\InvitationCode;
@@ -36,7 +38,7 @@ class RegisterController extends Controller
     public function store(RegisterRequest $request): RedirectResponse
     {
         $invitedBy = null;
-        $status = 'pending';
+        $status = UserStatus::Pending;
 
         if ($request->invitation_code) {
             $invitationCode = InvitationCode::where('code', $request->invitation_code)
@@ -46,7 +48,7 @@ class RegisterController extends Controller
 
             if ($invitationCode) {
                 $invitedBy = $invitationCode->created_by;
-                $status = 'active';
+                $status = UserStatus::Active;
             }
         }
 
@@ -54,7 +56,7 @@ class RegisterController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'operator',
+            'role' => UserRole::Operator,
             'status' => $status,
             'invited_by' => $invitedBy,
         ]);
@@ -65,7 +67,7 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        if ($user->status === 'pending') {
+        if ($user->status === UserStatus::Pending) {
             return redirect()->route('pending-approval');
         }
 

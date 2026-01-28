@@ -21,7 +21,7 @@ class UpdateContactRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'preferred_channel' => ['required', 'in:whatsapp,telegram'],
-            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts,phone,' . $contactId],
+            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts,phone,'.$contactId],
             'telegram_chat_id' => ['nullable', 'string', 'max:50'],
             'metadata' => ['nullable', 'array'],
             'is_active' => ['boolean'],

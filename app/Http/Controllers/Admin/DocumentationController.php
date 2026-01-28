@@ -38,7 +38,7 @@ class DocumentationController extends Controller
 
     public function index(string $page = 'readme')
     {
-        if (!isset($this->docs[$page])) {
+        if (! isset($this->docs[$page])) {
             $page = 'readme';
         }
 
@@ -52,7 +52,7 @@ class DocumentationController extends Controller
         return Inertia::render('admin/documentation/Index', [
             'content' => $content,
             'currentPage' => $page,
-            'pages' => collect($this->docs)->map(fn($d, $key) => [
+            'pages' => collect($this->docs)->map(fn ($d, $key) => [
                 'key' => $key,
                 'title' => $d['title'],
                 'icon' => $d['icon'],

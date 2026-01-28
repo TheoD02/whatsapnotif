@@ -34,12 +34,12 @@ class NotificationController extends Controller
 
         // Handle phone numbers: create contacts on the fly
         $phoneContactIds = [];
-        if (!empty($validated['recipients']['phones'])) {
+        if (! empty($validated['recipients']['phones'])) {
             foreach ($validated['recipients']['phones'] as $phone) {
                 $phone = Contact::formatPhone($phone);
                 $contact = Contact::firstOrCreate(
                     ['phone' => $phone],
-                    ['name' => 'API Contact ' . substr($phone, -4)]
+                    ['name' => 'API Contact '.substr($phone, -4)]
                 );
                 $phoneContactIds[] = $contact->id;
             }
@@ -58,7 +58,7 @@ class NotificationController extends Controller
         $content = $validated['content'];
 
         // Apply template if provided
-        if (!empty($validated['template_id'])) {
+        if (! empty($validated['template_id'])) {
             $template = \App\Models\MessageTemplate::find($validated['template_id']);
             if ($template) {
                 $content = $template->render($validated['template_data'] ?? []);

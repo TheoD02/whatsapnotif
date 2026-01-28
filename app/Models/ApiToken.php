@@ -61,6 +61,7 @@ class ApiToken extends Model
     public static function findByToken(string $plainToken): ?self
     {
         $hash = hash('sha256', $plainToken);
+
         return self::where('token_hash', $hash)->where('is_active', true)->first();
     }
 

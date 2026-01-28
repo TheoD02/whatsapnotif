@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MessagingChannel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -25,6 +26,7 @@ class Contact extends Model
         return [
             'metadata' => 'array',
             'is_active' => 'boolean',
+            'preferred_channel' => MessagingChannel::class,
         ];
     }
 
@@ -42,12 +44,14 @@ class Contact extends Model
     {
         $phone = preg_replace('/[^0-9+]/', '', $phone);
 
+        $defaultCountryCode = config('services.messaging.default_country_code', '+33');
+
         if (str_starts_with($phone, '0')) {
-            $phone = '+33' . substr($phone, 1);
+            $phone = $defaultCountryCode.substr($phone, 1);
         }
 
-        if (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        if (! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         return $phone;
@@ -55,7 +59,7 @@ class Contact extends Model
 
     public function getChannelIdentifier(): ?string
     {
-        return $this->preferred_channel === 'telegram'
+        return $this->preferred_channel === MessagingChannel::Telegram
             ? $this->telegram_chat_id
             : $this->phone;
     }

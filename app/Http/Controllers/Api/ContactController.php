@@ -25,6 +25,7 @@ class ContactController extends Controller
      * Retourne la liste paginée des contacts avec leurs groupes.
      *
      * @operationId listContacts
+     *
      * @queryParam group_id integer Filtrer par ID de groupe. Example: 1
      * @queryParam active boolean Filtrer par statut actif/inactif. Example: true
      * @queryParam per_page integer Nombre de résultats par page (défaut: 50). Example: 20
@@ -72,7 +73,7 @@ class ContactController extends Controller
             'metadata' => $validated['metadata'] ?? [],
         ]);
 
-        if (!empty($validated['group_ids'])) {
+        if (! empty($validated['group_ids'])) {
             $contact->groups()->sync($validated['group_ids']);
         }
 
@@ -121,6 +122,7 @@ class ContactController extends Controller
      * Retourne la liste de tous les groupes avec le nombre de contacts.
      *
      * @operationId listGroups
+     *
      * @tags Groupes
      */
     public function groups(): AnonymousResourceCollection
@@ -136,6 +138,7 @@ class ContactController extends Controller
      * Retourne la liste des templates de messages actifs.
      *
      * @operationId listTemplates
+     *
      * @tags Templates
      */
     public function templates(): AnonymousResourceCollection

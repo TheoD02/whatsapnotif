@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RecipientStatus;
 use App\Events\RecipientStatusUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class NotificationRecipient extends Model
     {
         return [
             'sent_at' => 'datetime',
+            'status' => RecipientStatus::class,
         ];
     }
 
@@ -39,7 +41,7 @@ class NotificationRecipient extends Model
     public function markAsSent(): void
     {
         $this->update([
-            'status' => 'sent',
+            'status' => RecipientStatus::Sent,
             'sent_at' => now(),
         ]);
 
@@ -49,7 +51,7 @@ class NotificationRecipient extends Model
     public function markAsFailed(string $errorMessage): void
     {
         $this->update([
-            'status' => 'failed',
+            'status' => RecipientStatus::Failed,
             'error_message' => $errorMessage,
         ]);
 
@@ -58,7 +60,7 @@ class NotificationRecipient extends Model
 
     public function markAsDelivered(): void
     {
-        $this->update(['status' => 'delivered']);
+        $this->update(['status' => RecipientStatus::Delivered]);
 
         broadcast(new RecipientStatusUpdated($this))->toOthers();
     }

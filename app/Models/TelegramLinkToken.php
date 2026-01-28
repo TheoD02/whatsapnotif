@@ -69,6 +69,7 @@ class TelegramLinkToken extends Model
     public function getDeepLink(): string
     {
         $botUsername = config('services.telegram.bot_username');
+
         return "https://t.me/{$botUsername}?start={$this->token}";
     }
 }

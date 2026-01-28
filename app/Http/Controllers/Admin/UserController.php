@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateUserGroupsRequest;
 use App\Http\Requests\Admin\UpdateUserRoleRequest;
@@ -62,14 +63,14 @@ class UserController extends Controller
 
     public function approve(User $user): RedirectResponse
     {
-        $user->update(['status' => 'active']);
+        $user->update(['status' => UserStatus::Active]);
 
         return back()->with('success', "L'utilisateur {$user->name} a été approuvé.");
     }
 
     public function reject(User $user): RedirectResponse
     {
-        $user->update(['status' => 'rejected']);
+        $user->update(['status' => UserStatus::Rejected]);
 
         return back()->with('success', "L'utilisateur {$user->name} a été rejeté.");
     }

@@ -13,13 +13,13 @@ class AuthenticateApiToken
     {
         $token = $request->bearerToken();
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['error' => 'Token manquant'], 401);
         }
 
         $apiToken = ApiToken::findByToken($token);
 
-        if (!$apiToken) {
+        if (! $apiToken) {
             return response()->json(['error' => 'Token invalide'], 401);
         }
 

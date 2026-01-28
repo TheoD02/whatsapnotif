@@ -20,7 +20,7 @@ class RecipientStatusUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('notifications.' . $this->recipient->notification_id),
+            new Channel('notifications.'.$this->recipient->notification_id),
         ];
     }
 

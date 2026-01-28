@@ -26,7 +26,7 @@ class TelegramChannel implements MessagingChannel
             return SendResult::failure('Telegram Bot non configuré');
         }
 
-        if (!$this->validateChatId($chatId)) {
+        if (! $this->validateChatId($chatId)) {
             return SendResult::failure('Chat ID Telegram invalide');
         }
 
