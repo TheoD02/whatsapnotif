@@ -8,8 +8,21 @@ use App\Models\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Contacts
+ */
 class ContactController extends Controller
 {
+    /**
+     * Lister les contacts
+     *
+     * Retourne la liste paginée des contacts avec leurs groupes.
+     *
+     * @operationId listContacts
+     * @queryParam group_id integer Filtrer par ID de groupe.
+     * @queryParam active boolean Filtrer par statut actif/inactif.
+     * @queryParam per_page integer Nombre de résultats par page (défaut: 50).
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Contact::with('groups');
@@ -29,6 +42,23 @@ class ContactController extends Controller
         return response()->json($contacts);
     }
 
+    /**
+     * Créer un contact
+     *
+     * Crée un nouveau contact avec ses groupes associés.
+     *
+     * @operationId createContact
+     * @response 201 {
+     *   "success": true,
+     *   "contact": {
+     *     "id": 1,
+     *     "name": "Jean Dupont",
+     *     "phone": "+33612345678",
+     *     "preferred_channel": "whatsapp",
+     *     "groups": []
+     *   }
+     * }
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -57,6 +87,13 @@ class ContactController extends Controller
         ], 201);
     }
 
+    /**
+     * Afficher un contact
+     *
+     * Retourne les détails d'un contact spécifique.
+     *
+     * @operationId getContact
+     */
     public function show(Contact $contact): JsonResponse
     {
         return response()->json([
@@ -64,6 +101,13 @@ class ContactController extends Controller
         ]);
     }
 
+    /**
+     * Modifier un contact
+     *
+     * Met à jour les informations d'un contact existant.
+     *
+     * @operationId updateContact
+     */
     public function update(Request $request, Contact $contact): JsonResponse
     {
         $validated = $request->validate([
@@ -91,6 +135,14 @@ class ContactController extends Controller
         ]);
     }
 
+    /**
+     * Lister les groupes
+     *
+     * Retourne la liste de tous les groupes avec le nombre de contacts.
+     *
+     * @operationId listGroups
+     * @tags Groupes
+     */
     public function groups(): JsonResponse
     {
         $groups = Group::withCount('contacts')->orderBy('name')->get();
@@ -100,6 +152,14 @@ class ContactController extends Controller
         ]);
     }
 
+    /**
+     * Lister les templates
+     *
+     * Retourne la liste des templates de messages actifs.
+     *
+     * @operationId listTemplates
+     * @tags Templates
+     */
     public function templates(): JsonResponse
     {
         $templates = \App\Models\MessageTemplate::where('is_active', true)

@@ -10,12 +10,31 @@ use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Notifications
+ */
 class NotificationController extends Controller
 {
     public function __construct(
         private NotificationService $notificationService
     ) {}
 
+    /**
+     * Envoyer une notification
+     *
+     * Envoie une notification à un ou plusieurs destinataires via WhatsApp ou Telegram.
+     *
+     * @operationId sendNotification
+     *
+     * @response 201 {
+     *   "success": true,
+     *   "notification_id": 42,
+     *   "recipients_count": 5
+     * }
+     * @response 422 {
+     *   "error": "Au moins un destinataire est requis"
+     * }
+     */
     public function send(Request $request): JsonResponse
     {
         $validated = $request->validate([

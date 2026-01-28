@@ -1,6 +1,6 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect, FormEvent } from 'react';
-import { Plus, Trash2, Key, Copy, Check, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Key, Copy, Check, AlertTriangle, ExternalLink } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -208,18 +208,17 @@ export default function ApiTokensIndex({ tokens }: Props) {
 
                         <div>
                             <h4 className="font-medium mb-2">
-                                Envoyer une notification
+                                Documentation interactive (OpenAPI)
                             </h4>
-                            <code className="block bg-muted p-3 rounded text-sm whitespace-pre">
-                                {`POST /api/v1/notifications/send
-{
-  "content": "Votre message",
-  "recipients": {
-    "contact_ids": [1, 2],
-    "group_ids": [1]
-  }
-}`}
-                            </code>
+                            <p className="text-sm text-muted-foreground mb-3">
+                                Consultez la documentation complète de l'API avec des exemples interactifs.
+                            </p>
+                            <Button asChild>
+                                <a href="/docs/api" target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="mr-2 h-4 w-4" />
+                                    Ouvrir la documentation API
+                                </a>
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
