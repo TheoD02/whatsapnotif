@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, XCircle, Clock, Send } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, CheckCircle, XCircle, Clock, Send, RefreshCw } from 'lucide-react';
 import OperatorLayout from '@/layouts/OperatorLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,15 @@ import {
 import type { Notification, NotificationRecipient } from '@/types';
 import { formatDateTime, formatPhone } from '@/lib/utils';
 
+interface RecipientUpdate {
+    id: number;
+    notification_id: number;
+    contact_id: number;
+    status: string;
+    error_message: string | null;
+    sent_at: string | null;
+}
+
 interface Props {
     notification: Notification & { recipients: NotificationRecipient[] };
     stats: {
@@ -32,7 +42,72 @@ interface Props {
     };
 }
 
-export default function HistoryShow({ notification, stats }: Props) {
+export default function HistoryShow({ notification, stats: initialStats }: Props) {
+    const [recipients, setRecipients] = useState(notification.recipients);
+    const [stats, setStats] = useState(initialStats);
+    const [notificationStatus, setNotificationStatus] = useState(
+        notification.status
+    );
+    const [isLive, setIsLive] = useState(false);
+
+    const recalculateStats = useCallback(
+        (updatedRecipients: NotificationRecipient[]) => {
+            const newStats = {
+                total: updatedRecipients.length,
+                sent: updatedRecipients.filter((r) => r.status === 'sent')
+                    .length,
+                delivered: updatedRecipients.filter(
+                    (r) => r.status === 'delivered'
+                ).length,
+                failed: updatedRecipients.filter((r) => r.status === 'failed')
+                    .length,
+                pending: updatedRecipients.filter((r) => r.status === 'pending')
+                    .length,
+            };
+            setStats(newStats);
+        },
+        []
+    );
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || !window.Echo) {
+            return;
+        }
+
+        const channel = window.Echo.channel(
+            `notifications.${notification.id}`
+        );
+
+        channel.listen('.recipient.updated', (data: RecipientUpdate) => {
+            setIsLive(true);
+            setRecipients((prev) => {
+                const updated = prev.map((r) =>
+                    r.id === data.id
+                        ? {
+                              ...r,
+                              status: data.status as NotificationRecipient['status'],
+                              error_message: data.error_message,
+                              sent_at: data.sent_at,
+                          }
+                        : r
+                );
+                recalculateStats(updated);
+                return updated;
+            });
+        });
+
+        channel.listen(
+            '.notification.updated',
+            (data: { id: number; status: string }) => {
+                setIsLive(true);
+                setNotificationStatus(data.status as Notification['status']);
+            }
+        );
+
+        return () => {
+            window.Echo.leaveChannel(`notifications.${notification.id}`);
+        };
+    }, [notification.id, recalculateStats]);
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'sent':
@@ -92,7 +167,16 @@ export default function HistoryShow({ notification, stats }: Props) {
                             )}
                         </p>
                     </div>
-                    {getNotificationStatusBadge(notification.status)}
+                    {getNotificationStatusBadge(notificationStatus)}
+                    {isLive && (
+                        <Badge
+                            variant="outline"
+                            className="ml-2 animate-pulse border-green-500 text-green-500"
+                        >
+                            <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
+                            Live
+                        </Badge>
+                    )}
                 </div>
 
                 {/* Stats */}
@@ -197,7 +281,7 @@ export default function HistoryShow({ notification, stats }: Props) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {notification.recipients?.map((recipient) => (
+                                {recipients?.map((recipient) => (
                                     <TableRow key={recipient.id}>
                                         <TableCell className="font-medium">
                                             {recipient.contact?.name ||

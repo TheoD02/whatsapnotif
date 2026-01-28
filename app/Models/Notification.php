@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\NotificationStatusUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,6 +60,8 @@ class Notification extends Model
     public function markAsSending(): void
     {
         $this->update(['status' => 'sending']);
+
+        broadcast(new NotificationStatusUpdated($this))->toOthers();
     }
 
     public function markAsCompleted(): void
@@ -78,5 +81,7 @@ class Notification extends Model
             'status' => $status,
             'sent_at' => now(),
         ]);
+
+        broadcast(new NotificationStatusUpdated($this))->toOthers();
     }
 }

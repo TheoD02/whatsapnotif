@@ -13,6 +13,7 @@ import {
     X,
     LogOut,
     ChevronDown,
+    Smartphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ const navigation = [
     { name: 'Groupes', href: '/admin/groups', icon: FolderOpen },
     { name: 'Templates', href: '/admin/templates', icon: FileText },
     { name: 'Tokens API', href: '/admin/api-tokens', icon: Key },
+    { name: 'WhatsApp', href: '/admin/whatsapp', icon: Smartphone },
 ];
 
 export default function AdminLayout({ children }: PropsWithChildren) {

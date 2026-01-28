@@ -23,3 +23,5 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /.claude
+/whatsapp-service/node_modules
+/whatsapp-service/auth_info

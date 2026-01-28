@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\RecipientStatusUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,6 +42,8 @@ class NotificationRecipient extends Model
             'status' => 'sent',
             'sent_at' => now(),
         ]);
+
+        broadcast(new RecipientStatusUpdated($this))->toOthers();
     }
 
     public function markAsFailed(string $errorMessage): void
@@ -49,10 +52,14 @@ class NotificationRecipient extends Model
             'status' => 'failed',
             'error_message' => $errorMessage,
         ]);
+
+        broadcast(new RecipientStatusUpdated($this))->toOthers();
     }
 
     public function markAsDelivered(): void
     {
         $this->update(['status' => 'delivered']);
+
+        broadcast(new RecipientStatusUpdated($this))->toOthers();
     }
 }
