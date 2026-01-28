@@ -1,6 +1,6 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { useState, FormEvent } from 'react';
-import { Plus, Trash2, Key, Copy, Check } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useState, useEffect, FormEvent } from 'react';
+import { Plus, Trash2, Key, Copy, Check, AlertTriangle } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,12 +36,30 @@ interface Props {
     tokens: ApiToken[];
 }
 
+interface FlashProps {
+    newToken?: {
+        name: string;
+        token: string;
+    };
+}
+
 export default function ApiTokensIndex({ tokens }: Props) {
+    const { props } = usePage<{ flash: FlashProps }>();
     const [createOpen, setCreateOpen] = useState(false);
+    const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
+    const [newToken, setNewToken] = useState<{ name: string; token: string } | null>(null);
     const [copied, setCopied] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
     });
+
+    // Show token dialog when a new token is created
+    useEffect(() => {
+        if (props.flash?.newToken) {
+            setNewToken(props.flash.newToken);
+            setTokenDialogOpen(true);
+        }
+    }, [props.flash?.newToken]);
 
     const handleCreate = (e: FormEvent) => {
         e.preventDefault();
@@ -207,6 +225,7 @@ export default function ApiTokensIndex({ tokens }: Props) {
                 </Card>
             </div>
 
+            {/* Create Token Dialog */}
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -248,6 +267,66 @@ export default function ApiTokensIndex({ tokens }: Props) {
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* New Token Display Dialog */}
+            <Dialog open={tokenDialogOpen} onOpenChange={setTokenDialogOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Key className="h-5 w-5 text-green-500" />
+                            Token créé avec succès
+                        </DialogTitle>
+                        <DialogDescription>
+                            Copiez ce token maintenant. Il ne sera plus jamais affiché.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {newToken && (
+                        <div className="space-y-4 py-4">
+                            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+                                <div className="flex items-start gap-3">
+                                    <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                    <div className="text-sm text-amber-800 dark:text-amber-200">
+                                        <p className="font-medium">Important</p>
+                                        <p>Ce token ne sera affiché qu'une seule fois. Copiez-le et conservez-le en lieu sûr.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Nom</Label>
+                                <p className="text-sm font-medium">{newToken.name}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Token</Label>
+                                <div className="flex items-center gap-2">
+                                    <code className="flex-1 p-3 bg-muted rounded text-sm font-mono break-all select-all">
+                                        {newToken.token}
+                                    </code>
+                                    <Button
+                                        size="icon"
+                                        variant="outline"
+                                        onClick={() => copyToClipboard(newToken.token)}
+                                    >
+                                        {copied ? (
+                                            <Check className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                            <Copy className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter>
+                        <Button onClick={() => setTokenDialogOpen(false)}>
+                            J'ai copié le token
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </AdminLayout>

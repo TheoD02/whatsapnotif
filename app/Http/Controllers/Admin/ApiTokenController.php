@@ -36,7 +36,10 @@ class ApiTokenController extends Controller
             $validated['abilities'] ?? ['*']
         );
 
-        return back()->with('success', "Token créé : {$result['plain_token']}");
+        return back()->with('newToken', [
+            'name' => $validated['name'],
+            'token' => $result['plain_token'],
+        ]);
     }
 
     public function destroy(ApiToken $apiToken): RedirectResponse
