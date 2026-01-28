@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreTemplateRequest;
+use App\Http\Requests\Admin\UpdateTemplateRequest;
 use App\Models\MessageTemplate;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,12 +28,9 @@ class TemplateController extends Controller
         return Inertia::render('admin/templates/Create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTemplateRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string', 'max:4096'],
-        ]);
+        $validated = $request->validated();
 
         MessageTemplate::create([
             ...$validated,
@@ -50,15 +48,9 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function update(Request $request, MessageTemplate $template): RedirectResponse
+    public function update(UpdateTemplateRequest $request, MessageTemplate $template): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string', 'max:4096'],
-            'is_active' => ['boolean'],
-        ]);
-
-        $template->update($validated);
+        $template->update($request->validated());
 
         return redirect()->route('admin.templates.index')
             ->with('success', "Le template {$template->name} a été mis à jour.");

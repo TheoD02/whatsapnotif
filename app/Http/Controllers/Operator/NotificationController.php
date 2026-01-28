@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Operator;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Operator\StoreNotificationRequest;
+use App\Http\Requests\Operator\TestNotificationRequest;
 use App\Jobs\SendNotificationJob;
 use App\Models\Contact;
 use App\Models\Group;
@@ -11,7 +13,6 @@ use App\Models\Notification;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -45,22 +46,9 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreNotificationRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'content' => ['required', 'string', 'max:4096'],
-            'template_id' => ['nullable', 'exists:message_templates,id'],
-            'contact_ids' => ['nullable', 'array'],
-            'contact_ids.*' => ['exists:contacts,id'],
-            'group_ids' => ['nullable', 'array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
-
-        if (empty($validated['contact_ids']) && empty($validated['group_ids'])) {
-            return back()->withErrors(['recipients' => 'Veuillez sélectionner au moins un destinataire.']);
-        }
-
+        $validated = $request->validated();
         $user = auth()->user();
 
         // Verify user has permission to send to these groups
@@ -90,12 +78,9 @@ class NotificationController extends Controller
             ->with('success', 'Notification envoyée avec succès.');
     }
 
-    public function test(Request $request): JsonResponse
+    public function test(TestNotificationRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'phone' => ['required', 'string', 'max:20'],
-            'content' => ['required', 'string', 'max:4096'],
-        ]);
+        $validated = $request->validated();
 
         $result = $this->notificationService->sendTest(
             $validated['phone'],

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreInvitationRequest;
 use App\Models\InvitationCode;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,13 +22,9 @@ class InvitationController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreInvitationRequest $request): RedirectResponse
     {
-        $request->validate([
-            'expires_in_days' => ['nullable', 'integer', 'min:1', 'max:30'],
-        ]);
-
-        $expiresInDays = $request->expires_in_days ?? 7;
+        $expiresInDays = $request->validated()['expires_in_days'] ?? 7;
 
         $invitation = InvitationCode::generate(auth()->user(), $expiresInDays);
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateUserGroupsRequest;
+use App\Http\Requests\Admin\UpdateUserRoleRequest;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -72,25 +74,16 @@ class UserController extends Controller
         return back()->with('success', "L'utilisateur {$user->name} a été rejeté.");
     }
 
-    public function updateRole(Request $request, User $user): RedirectResponse
+    public function updateRole(UpdateUserRoleRequest $request, User $user): RedirectResponse
     {
-        $request->validate([
-            'role' => ['required', 'in:admin,operator'],
-        ]);
-
-        $user->update(['role' => $request->role]);
+        $user->update(['role' => $request->validated()['role']]);
 
         return back()->with('success', "Le rôle de {$user->name} a été mis à jour.");
     }
 
-    public function updateGroups(Request $request, User $user): RedirectResponse
+    public function updateGroups(UpdateUserGroupsRequest $request, User $user): RedirectResponse
     {
-        $request->validate([
-            'group_ids' => ['array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
-
-        $user->allowedGroups()->sync($request->group_ids ?? []);
+        $user->allowedGroups()->sync($request->validated()['group_ids'] ?? []);
 
         return back()->with('success', "Les permissions de groupe de {$user->name} ont été mises à jour.");
     }

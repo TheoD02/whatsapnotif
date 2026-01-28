@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreApiTokenRequest;
 use App\Models\ApiToken;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,13 +22,9 @@ class ApiTokenController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreApiTokenRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'abilities' => ['array'],
-            'abilities.*' => ['string'],
-        ]);
+        $validated = $request->validated();
 
         $result = ApiToken::generate(
             auth()->user(),

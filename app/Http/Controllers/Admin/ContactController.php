@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ImportContactsRequest;
+use App\Http\Requests\Admin\StoreContactRequest;
+use App\Http\Requests\Admin\TestMessageRequest;
+use App\Http\Requests\Admin\UpdateContactRequest;
 use App\Models\Contact;
 use App\Models\Group;
 use App\Services\NotificationService;
@@ -55,17 +59,9 @@ class ContactController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreContactRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'preferred_channel' => ['required', 'in:whatsapp,telegram'],
-            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts'],
-            'telegram_chat_id' => ['nullable', 'string', 'max:50'],
-            'metadata' => ['nullable', 'array'],
-            'group_ids' => ['nullable', 'array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['phone'])) {
             $validated['phone'] = Contact::formatPhone($validated['phone']);
@@ -98,18 +94,9 @@ class ContactController extends Controller
         ]);
     }
 
-    public function update(Request $request, Contact $contact): RedirectResponse
+    public function update(UpdateContactRequest $request, Contact $contact): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'preferred_channel' => ['required', 'in:whatsapp,telegram'],
-            'phone' => ['required_if:preferred_channel,whatsapp', 'nullable', 'string', 'max:20', 'unique:contacts,phone,' . $contact->id],
-            'telegram_chat_id' => ['nullable', 'string', 'max:50'],
-            'metadata' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
-            'group_ids' => ['nullable', 'array'],
-            'group_ids.*' => ['exists:groups,id'],
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['phone'])) {
             $validated['phone'] = Contact::formatPhone($validated['phone']);
@@ -138,13 +125,8 @@ class ContactController extends Controller
             ->with('success', 'Le contact a été supprimé.');
     }
 
-    public function import(Request $request): RedirectResponse
+    public function import(ImportContactsRequest $request): RedirectResponse
     {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:csv,txt'],
-            'group_id' => ['nullable', 'exists:groups,id'],
-        ]);
-
         $file = $request->file('file');
         $handle = fopen($file->getPathname(), 'r');
 
@@ -192,13 +174,9 @@ class ContactController extends Controller
         return back()->with('success', $message);
     }
 
-    public function testMessage(Request $request, NotificationService $notificationService): JsonResponse
+    public function testMessage(TestMessageRequest $request, NotificationService $notificationService): JsonResponse
     {
-        $validated = $request->validate([
-            'identifier' => ['required', 'string'],
-            'message' => ['required', 'string'],
-            'channel' => ['required', 'in:whatsapp,telegram'],
-        ]);
+        $validated = $request->validated();
 
         $result = $notificationService->sendTest(
             $validated['identifier'],

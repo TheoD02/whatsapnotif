@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreGroupRequest;
+use App\Http\Requests\Admin\UpdateGroupRequest;
 use App\Models\Group;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,13 +29,9 @@ class GroupController extends Controller
         return Inertia::render('admin/groups/Create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreGroupRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'color' => ['required', 'string', 'max:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-        ]);
+        $validated = $request->validated();
 
         $validated['slug'] = Str::slug($validated['name']);
 
@@ -60,15 +57,9 @@ class GroupController extends Controller
         ]);
     }
 
-    public function update(Request $request, Group $group): RedirectResponse
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'color' => ['required', 'string', 'max:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-        ]);
-
-        $group->update($validated);
+        $group->update($request->validated());
 
         return redirect()->route('admin.groups.index')
             ->with('success', "Le groupe {$group->name} a été mis à jour.");
