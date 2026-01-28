@@ -10,6 +10,7 @@ import {
     Phone,
     Send,
     MessageSquare,
+    Link as LinkIcon,
 } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -46,6 +48,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import TelegramLinkDialog from '@/components/TelegramLinkDialog';
 import type { Contact, Group, PaginatedData, PreferredChannel } from '@/types';
 import { formatPhone } from '@/lib/utils';
 
@@ -89,6 +92,8 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
         success?: boolean;
         error?: string;
     } | null>(null);
+    const [telegramLinkContact, setTelegramLinkContact] =
+        useState<Contact | null>(null);
 
     const handleSearch = (value: string) => {
         setSearch(value);
@@ -363,6 +368,17 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                                                         <Send className="mr-2 h-4 w-4" />
                                                         Envoyer un test
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={() =>
+                                                            setTelegramLinkContact(
+                                                                contact
+                                                            )
+                                                        }
+                                                    >
+                                                        <LinkIcon className="mr-2 h-4 w-4" />
+                                                        Lier Telegram
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
                                                     <DropdownMenuItem asChild>
                                                         <Link
                                                             href={`/admin/contacts/${contact.id}/edit`}
@@ -539,6 +555,16 @@ export default function ContactsIndex({ contacts, groups, filters }: Props) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Telegram Link Dialog */}
+            <TelegramLinkDialog
+                contact={telegramLinkContact}
+                open={!!telegramLinkContact}
+                onOpenChange={(open) =>
+                    !open && setTelegramLinkContact(null)
+                }
+                onLinked={() => router.reload()}
+            />
         </AdminLayout>
     );
 }

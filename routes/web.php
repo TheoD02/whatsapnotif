@@ -60,6 +60,11 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class, \Ap
         Route::post('/contacts/import', [Admin\ContactController::class, 'import'])->name('contacts.import');
         Route::post('/contacts/test-message', [Admin\ContactController::class, 'testMessage'])->name('contacts.test-message');
 
+        // Telegram Link
+        Route::post('/contacts/{contact}/telegram-link', [Admin\TelegramLinkController::class, 'generate'])->name('contacts.telegram-link.generate');
+        Route::get('/contacts/{contact}/telegram-link/status', [Admin\TelegramLinkController::class, 'status'])->name('contacts.telegram-link.status');
+        Route::get('/contacts/{contact}/telegram-link/check', [Admin\TelegramLinkController::class, 'checkPending'])->name('contacts.telegram-link.check');
+
         // Groups
         Route::resource('groups', Admin\GroupController::class);
 

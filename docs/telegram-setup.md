@@ -17,13 +17,52 @@ Use this token to access the HTTP API:
 
 ## 2. Configurer l'application
 
-Ajoutez le token dans votre fichier `.env` :
+Ajoutez le token et le username du bot dans votre fichier `.env` :
 
 ```env
 TELEGRAM_BOT_TOKEN=7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TELEGRAM_BOT_USERNAME=monapp_notif_bot
 ```
 
-## 3. Obtenir le Chat ID d'un contact
+## 3. Configurer le Webhook (optionnel mais recommandé)
+
+Le webhook permet l'enregistrement automatique des contacts via QR code ou lien.
+
+```bash
+# Remplacez par votre URL publique et votre token
+curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://votre-domaine.com/api/telegram/webhook"
+```
+
+Pour le développement local, utilisez ngrok ou un service similaire :
+```bash
+ngrok http 8000
+# Puis configurez le webhook avec l'URL ngrok
+```
+
+## 4. Lier un contact Telegram (3 méthodes)
+
+### Méthode 1 : QR Code (Recommandé)
+
+1. Dans la liste des contacts, cliquez sur **⋮** > **Lier Telegram**
+2. Un QR code s'affiche
+3. Le contact scanne le QR code avec son téléphone
+4. Telegram s'ouvre et le compte est lié automatiquement
+
+### Méthode 2 : Lien de liaison
+
+1. Dans la liste des contacts, cliquez sur **⋮** > **Lier Telegram**
+2. Onglet **Lien** : copiez et envoyez le lien au contact
+3. Le contact clique sur le lien → Telegram s'ouvre → compte lié
+
+### Méthode 3 : Code à 6 caractères
+
+1. Dans la liste des contacts, cliquez sur **⋮** > **Lier Telegram**
+2. Onglet **Code** : donnez le code au contact (ex: `ABC123`)
+3. Le contact envoie ce code au bot → compte lié
+
+> **Note** : Les liens et codes expirent après 30 minutes.
+
+## 5. Obtenir le Chat ID manuellement (méthode alternative)
 
 Pour envoyer des messages via Telegram, vous avez besoin du `chat_id` de chaque destinataire.
 
