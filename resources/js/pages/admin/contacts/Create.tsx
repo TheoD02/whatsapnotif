@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Send, Info } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Group, PreferredChannel } from '@/types';
 
 interface Props {
@@ -143,31 +144,15 @@ export default function ContactCreate({ groups }: Props) {
                             )}
 
                             {data.preferred_channel === 'telegram' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="telegram_chat_id">
-                                        Chat ID Telegram
-                                    </Label>
-                                    <Input
-                                        id="telegram_chat_id"
-                                        value={data.telegram_chat_id}
-                                        onChange={(e) =>
-                                            setData(
-                                                'telegram_chat_id',
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="123456789"
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Obtenez le chat ID via @userinfobot sur
-                                        Telegram
-                                    </p>
-                                    {errors.telegram_chat_id && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.telegram_chat_id}
-                                        </p>
-                                    )}
-                                </div>
+                                <Alert>
+                                    <Send className="h-4 w-4" />
+                                    <AlertDescription>
+                                        Après la création du contact, vous
+                                        pourrez générer un QR code ou un lien
+                                        pour lier automatiquement le compte
+                                        Telegram.
+                                    </AlertDescription>
+                                </Alert>
                             )}
 
                             {groups.length > 0 && (

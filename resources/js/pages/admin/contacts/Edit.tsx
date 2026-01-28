@@ -1,11 +1,12 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { FormEvent, useState } from 'react';
+import { ArrowLeft, Send, Check, Link as LinkIcon } from 'lucide-react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -20,6 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import TelegramLinkDialog from '@/components/TelegramLinkDialog';
 import type { Contact, Group, PreferredChannel } from '@/types';
 
 interface Props {
@@ -28,6 +30,9 @@ interface Props {
 }
 
 export default function ContactEdit({ contact, groups }: Props) {
+    const [telegramLinkOpen, setTelegramLinkOpen] = useState(false);
+    const [currentContact, setCurrentContact] = useState(contact);
+
     const { data, setData, put, processing, errors } = useForm({
         name: contact.name,
         phone: contact.phone,
@@ -36,6 +41,8 @@ export default function ContactEdit({ contact, groups }: Props) {
         is_active: contact.is_active,
         group_ids: contact.groups?.map((g) => g.id) || [],
     });
+
+    const isLinked = !!currentContact.telegram_chat_id;
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -141,30 +148,71 @@ export default function ContactEdit({ contact, groups }: Props) {
                             )}
 
                             {data.preferred_channel === 'telegram' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="telegram_chat_id">
-                                        Chat ID Telegram
-                                    </Label>
-                                    <Input
-                                        id="telegram_chat_id"
-                                        value={data.telegram_chat_id}
-                                        onChange={(e) =>
-                                            setData(
-                                                'telegram_chat_id',
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="123456789"
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Obtenez le chat ID via @userinfobot sur
-                                        Telegram
-                                    </p>
-                                    {errors.telegram_chat_id && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.telegram_chat_id}
-                                        </p>
-                                    )}
+                                <div className="space-y-3">
+                                    <Label>Compte Telegram</Label>
+                                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                        {isLinked ? (
+                                            <>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge
+                                                            variant="default"
+                                                            className="bg-green-500"
+                                                        >
+                                                            <Check className="h-3 w-3 mr-1" />
+                                                            Lié
+                                                        </Badge>
+                                                        <span className="text-sm text-muted-foreground">
+                                                            Chat ID:{' '}
+                                                            {
+                                                                currentContact.telegram_chat_id
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setTelegramLinkOpen(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    <LinkIcon className="h-4 w-4 mr-1" />
+                                                    Relier
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="secondary">
+                                                            Non lié
+                                                        </Badge>
+                                                        <span className="text-sm text-muted-foreground">
+                                                            Aucun compte
+                                                            Telegram associé
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        setTelegramLinkOpen(
+                                                            true
+                                                        )
+                                                    }
+                                                >
+                                                    <Send className="h-4 w-4 mr-1" />
+                                                    Lier Telegram
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
@@ -230,6 +278,19 @@ export default function ContactEdit({ contact, groups }: Props) {
                     </CardContent>
                 </Card>
             </div>
+
+            <TelegramLinkDialog
+                contact={currentContact}
+                open={telegramLinkOpen}
+                onOpenChange={setTelegramLinkOpen}
+                onLinked={() => {
+                    router.reload({ only: ['contact'] });
+                    setCurrentContact({
+                        ...currentContact,
+                        telegram_chat_id: 'linked',
+                    });
+                }}
+            />
         </AdminLayout>
     );
 }
