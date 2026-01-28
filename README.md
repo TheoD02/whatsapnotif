@@ -1,59 +1,119 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# WhatsApp Hub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plateforme de notifications multi-canal (WhatsApp & Telegram) avec interface d'administration.
 
-## About Laravel
+## Fonctionnalités
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Multi-canal** : Envoi de notifications via WhatsApp et Telegram
+- **Gestion des contacts** : Import CSV, groupes, métadonnées personnalisées
+- **Templates** : Messages réutilisables avec variables dynamiques
+- **Interface Admin** : Gestion complète des utilisateurs, contacts, groupes
+- **Interface Opérateur** : Envoi de notifications, historique
+- **Temps réel** : Suivi du statut d'envoi en direct (WebSocket)
+- **API REST** : Intégration avec vos applications
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack technique
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend** : Laravel 12, PHP 8.2+
+- **Frontend** : React, TypeScript, Inertia.js, Tailwind CSS, shadcn/ui
+- **Base de données** : SQLite (dev) / MySQL / PostgreSQL
+- **WebSocket** : Laravel Reverb
+- **Messaging** : WhatsApp Cloud API / Baileys, Telegram Bot API
 
-## Learning Laravel
+## Installation rapide
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+# Cloner et installer
+git clone <repo-url>
+cd whats
+composer install
+npm install
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Configuration
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
 
-## Laravel Sponsors
+# Créer un admin
+php artisan tinker
+> App\Models\User::create(['name' => 'Admin', 'email' => 'admin@example.com', 'password' => bcrypt('password'), 'role' => 'admin', 'status' => 'active']);
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Lancer l'application
+composer run dev
+```
 
-### Premium Partners
+L'application sera disponible sur `http://localhost:8000`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Configuration des canaux
 
-## Contributing
+### WhatsApp
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Deux options disponibles :
 
-## Code of Conduct
+1. **WhatsApp Cloud API** (Production) - Voir [docs/whatsapp-setup.md](docs/whatsapp-setup.md)
+2. **Baileys** (Développement) - Service Node.js local
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Telegram
 
-## Security Vulnerabilities
+Configuration du bot et liaison automatique des contacts via QR code.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Voir [docs/telegram-setup.md](docs/telegram-setup.md)
 
-## License
+## Architecture
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+app/
+├── Http/Controllers/
+│   ├── Admin/          # Contrôleurs admin (users, contacts, groups...)
+│   ├── Operator/       # Contrôleurs opérateur (notifications, history)
+│   └── Api/            # API REST
+├── Models/             # Eloquent models
+├── Services/
+│   ├── Messaging/      # Canaux (WhatsApp, Telegram, Mock)
+│   └── NotificationService.php
+└── Events/             # Broadcasting events
+
+resources/js/
+├── components/         # Composants React réutilisables
+├── layouts/            # Layouts (Admin, Operator)
+├── pages/              # Pages Inertia
+└── types/              # Types TypeScript
+```
+
+## API
+
+L'API permet d'envoyer des notifications depuis vos applications.
+
+```bash
+# Créer un token API dans Admin > Tokens API
+
+# Envoyer une notification
+curl -X POST https://votre-domaine.com/api/v1/notifications/send \
+  -H "Authorization: Bearer VOTRE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Bonjour {{nom}} !",
+    "contact_ids": [1, 2, 3]
+  }'
+```
+
+Voir [docs/api.md](docs/api.md) pour la documentation complète.
+
+## Scripts
+
+```bash
+composer run dev      # Lancer tous les services (server, queue, reverb, vite)
+composer run test     # Lancer les tests
+npm run build         # Build production
+```
+
+## Documentation
+
+- [Installation détaillée](docs/installation.md)
+- [Configuration WhatsApp](docs/whatsapp-setup.md)
+- [Configuration Telegram](docs/telegram-setup.md)
+- [API Reference](docs/api.md)
+
+## Licence
+
+MIT
