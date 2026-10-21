@@ -2,7 +2,7 @@ import type { User } from './models';
 
 export * from './models';
 
-export interface PageProps {
+export type PageProps = {
     auth: {
         user: User | null;
     };
@@ -11,8 +11,4 @@ export interface PageProps {
         error?: string;
     };
     errors: Record<string, string>;
-}
-
-declare module '@inertiajs/react' {
-    export interface PageProps extends PageProps {}
-}
+};
