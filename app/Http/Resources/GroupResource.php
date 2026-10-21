@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Group
+ * @mixin Group
  */
 class GroupResource extends JsonResource
 {

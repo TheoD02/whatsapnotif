@@ -3,9 +3,7 @@ import {
     Users,
     UserCheck,
     Contact,
-    FolderOpen,
     Send,
-    TrendingUp,
     ArrowRight,
     MessageSquare,
 } from 'lucide-react';

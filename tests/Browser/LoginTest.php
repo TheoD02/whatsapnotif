@@ -79,6 +79,6 @@ test('remember me checkbox works', function () {
             ->login($user->email, 'password', remember: true)
             ->waitForLocation('/dashboard')
             ->assertPathIs('/dashboard')
-            ->assertCookieExists('remember_web_' . sha1(\App\Models\User::class));
+            ->assertCookieExists('remember_web_'.sha1(User::class));
     });
 });

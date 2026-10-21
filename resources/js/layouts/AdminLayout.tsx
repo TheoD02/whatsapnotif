@@ -5,7 +5,6 @@ import {
     Users,
     FolderOpen,
     FileText,
-    History,
     Settings,
     Key,
     LayoutDashboard,

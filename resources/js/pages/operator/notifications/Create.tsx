@@ -1,4 +1,4 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useState, useMemo } from 'react';
 import { Send, Users, FileText, FlaskConical } from 'lucide-react';
 import OperatorLayout from '@/layouts/OperatorLayout';
