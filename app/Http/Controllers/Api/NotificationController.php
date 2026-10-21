@@ -7,6 +7,7 @@ use App\Http\Requests\Api\SendNotificationRequest;
 use App\Http\Resources\NotificationSentResource;
 use App\Jobs\SendNotificationJob;
 use App\Models\Contact;
+use App\Models\MessageTemplate;
 use App\Services\NotificationService;
 
 /**
@@ -59,7 +60,7 @@ class NotificationController extends Controller
 
         // Apply template if provided
         if (! empty($validated['template_id'])) {
-            $template = \App\Models\MessageTemplate::find($validated['template_id']);
+            $template = MessageTemplate::find($validated['template_id']);
             if ($template) {
                 $content = $template->render($validated['template_data'] ?? []);
             }

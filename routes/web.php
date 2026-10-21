@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\Operator;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsApproved;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,7 +40,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin routes
-Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class, \App\Http\Middleware\EnsureUserIsAdmin::class])
+Route::middleware(['auth', EnsureUserIsApproved::class, EnsureUserIsAdmin::class])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -84,7 +86,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class, \Ap
     });
 
 // Operator routes
-Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsApproved::class])
+Route::middleware(['auth', EnsureUserIsApproved::class])
     ->group(function () {
         Route::get('/dashboard', [Operator\DashboardController::class, 'index'])->name('dashboard');
 

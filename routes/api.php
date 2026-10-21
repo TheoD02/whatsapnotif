@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\Api;
 use App\Http\Controllers\TelegramWebhookController;
+use App\Http\Middleware\AuthenticateApiToken;
 use Illuminate\Support\Facades\Route;
 
 // Telegram Webhook (no auth required)
 Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])->name('telegram.webhook');
 
-Route::prefix('v1')->middleware(\App\Http\Middleware\AuthenticateApiToken::class)->group(function () {
+Route::prefix('v1')->middleware(AuthenticateApiToken::class)->group(function () {
     // Notifications
     Route::post('/notifications/send', [Api\NotificationController::class, 'send']);
 

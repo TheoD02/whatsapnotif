@@ -5,10 +5,11 @@ namespace Database\Factories;
 use App\Enums\RecipientStatus;
 use App\Models\Contact;
 use App\Models\Notification;
+use App\Models\NotificationRecipient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\NotificationRecipient>
+ * @extends Factory<NotificationRecipient>
  */
 class NotificationRecipientFactory extends Factory
 {

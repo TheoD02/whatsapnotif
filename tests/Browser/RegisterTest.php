@@ -57,7 +57,7 @@ test('register page shows valid code badge when url has valid code', function ()
     $invitationCode = InvitationCode::generate($admin);
 
     $this->browse(function (Browser $browser) use ($invitationCode) {
-        $browser->visit('/register?code=' . $invitationCode->code)
+        $browser->visit('/register?code='.$invitationCode->code)
             ->assertSee('Code valide')
             ->assertSee('Votre compte sera activé immédiatement');
     });
